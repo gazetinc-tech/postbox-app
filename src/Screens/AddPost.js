@@ -66,7 +66,7 @@ const AddPost = ({route}) => {
     form.append('text', number);
     files.map(item => form.append('images[]', item));
     console?.log(form, 'form', userToken, `${BaseUrl}/add-post`);
-
+    // LOG  {"_parts": [["header", "2"], ["cust_ids", ""], ["text", ""], ["images[]", [Object]]]} form 966|p29yTlQ3emQozzucPgrJXyGqbPuLvAeqOj4vfVTEf61995a6 https://shopninja.in/anurag/postbox/api/user/add-post
     await axios
       .post(BaseUrl + '/add-post', form, {
         headers: {

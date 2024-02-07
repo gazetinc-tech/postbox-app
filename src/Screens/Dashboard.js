@@ -33,6 +33,8 @@ import ImagePicker from 'react-native-image-crop-picker';
 import Snackbar from 'react-native-snackbar';
 import {useFocusEffect} from '@react-navigation/native';
 import moment from 'moment';
+import {heightPercentageToDP as hp, widthPercentageToDP as wp} from 'react-native-responsive-screen';
+import VideoPlayer from './VideoPlayer';
 
 function Dashboard() {
   const navigation = useNavigation();
@@ -55,6 +57,8 @@ function Dashboard() {
   const [uploade, setUploade] = useState(false);
   const [loading, setLoading] = useState(false);
   const [postSelected, setPostSelected] = useState({});
+  const [isPlaying,setIsPlaying] = useState(false);
+
   const takePhotoFromCamera = () => {
     setUploade(false);
     ImagePicker.openCamera({
@@ -276,6 +280,47 @@ function Dashboard() {
       console.log(error, 'error');
     }
   };
+
+  const postComment = async ()=>{
+    console.log('comment::::::::::::::::::', token);
+
+    new Promise((resolve, reject) => {
+      let formdata = new FormData();
+      formdata.append("post_id",postSelected?.post_id)
+      formdata.append("text", search)
+      console.log('check in FormData:', formdata)
+
+      fetch('https://shopninja.in/anurag/postbox/api/user/add-comment', {
+          method: 'POST',
+          headers: {
+              Authorization: `Bearer ${token}`,
+          },
+          body: formdata
+      })
+          .then((response) => {
+              if (response.status === 200) {
+                  return response.json();
+                  // console.log(response.json(), 'success:::::::::::');
+              } else {
+                  // throw new Error(`HTTP error! Status: ${response.status}`);
+                  console.log('::ERROR IN POST comment::')
+                  // return response.json();
+              }
+          })
+          .then((json) => {
+              console.log('post commment response::::::::::', json);
+              setSearch('');
+              getPost();
+              onClose();
+          })
+          .catch((error) => {
+              console.log('=== ERROR ===', error);
+              // reject(error);
+          });
+  })
+  }
+
+
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#611EBD'}}>
       <View style={{flex: 1}}>
@@ -762,7 +807,7 @@ function Dashboard() {
                             justifyContent: 'space-between',
                           }}>
                           <TouchableOpacity
-                            onPress={() => navigation.navigate('OtherProfile')}
+                            onPress={() => navigation.navigate('OtherProfile',{item:item})}
                             style={{
                               flexDirection: 'row',
                               alignItems: 'center',
@@ -835,14 +880,14 @@ function Dashboard() {
                               </View>
                             </View>
                           </TouchableOpacity>
-                          <FastImage
+                          {/* <FastImage
                             source={require('../image/Group11.png')}
                             resizeMode={FastImage.resizeMode.contain}
                             style={{
                               height: moderateScale(20),
                               width: moderateScale(15),
                             }}
-                          />
+                          /> */}
                         </View>
                         <Skeleton
                           isLoaded={skeletonLoader}
@@ -865,7 +910,9 @@ function Dashboard() {
                           pagingEnabled
                           showsHorizontalScrollIndicator={false}
                           renderItem={({item: postData, index}) => {
-                            return (
+
+                            if(postData?.type === 'jpg' || postData?.type === 'gif'){
+                              return (              
                               <TouchableOpacity
                                 onPress={() => {
                                   const data = {
@@ -901,7 +948,23 @@ function Dashboard() {
                                   />
                                 </Skeleton>
                               </TouchableOpacity>
-                            );
+                            );}
+                            else{
+                            return(
+                              <View style={{
+                                height:hp(20),
+                                width:wp(80), 
+                              }}>
+                                  <VideoPlayer
+                                  url={postData?.image}
+                                  isPlaying={isPlaying}
+                                  onPlay={() => setIsPlaying(true)}
+                                  height={20}
+                                  width={wp(80)}
+                                  />
+                              </View>
+                          )
+                         }
                           }}
                         />
 
@@ -1073,6 +1136,8 @@ function Dashboard() {
           </>
         )}
       </View>
+
+
       <Actionsheet isOpen={isOpen} onClose={onClose}>
         <Actionsheet.Content style={{backgroundColor: '#ffffff'}}>
           <Text
@@ -1185,6 +1250,7 @@ function Dashboard() {
               onChangeText={text => setSearch(text)}
             />
             <TouchableOpacity
+              onPress={()=>{postComment()}}
               disabled={search.length === 0 ? true : false}
               style={{
                 width: moderateScale(25),
@@ -1203,6 +1269,8 @@ function Dashboard() {
           </View>
         </Actionsheet.Content>
       </Actionsheet>
+
+      
       <Actionsheet isOpen={uploade} onClose={() => setUploade(false)}>
         <Actionsheet.Content style={{width: '100%'}}>
           <Center style={{width: '100%'}}>
@@ -1230,6 +1298,7 @@ function Dashboard() {
           </Center>
         </Actionsheet.Content>
       </Actionsheet>
+      
       <ImageView
         images={selectedImage}
         imageIndex={0}
