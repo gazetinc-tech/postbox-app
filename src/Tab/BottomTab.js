@@ -1,19 +1,22 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react/no-unstable-nested-components */
 /* eslint-disable prettier/prettier */
-import {StyleSheet, Text, View} from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import React from 'react';
 import FastImage from 'react-native-fast-image';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Dashboard from '../Screens/Dashboard';
 import InboxList from '../Screens/InboxList';
 import AddPost from '../Screens/AddPost';
 import Group from '../Screens/Group';
-import {moderateScale} from '../utils/overAllNormalization';
+import { moderateScale } from '../utils/overAllNormalization';
 import Notification from '../Screens/Notification';
+import { heightPercentageToDP, widthPercentageToDP } from 'react-native-responsive-screen';
 
-export default function BottomTab() {
-  const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator();
+
+
+export default function BottomTab () {
   return (
     <Tab.Navigator
       screenOptions={{
@@ -23,7 +26,7 @@ export default function BottomTab() {
         tabBarStyle: {
           borderTopWidth: 0,
           // borderTopColor: '#f9f9f9',
-          height: 55,
+          height: heightPercentageToDP( 6.5 ),
           backgroundColor: '#7521FF',
           marginHorizontal: 0,
           // borderRadius: 15,
@@ -35,32 +38,47 @@ export default function BottomTab() {
         component={Dashboard}
         options={{
           headerShown: false,
-          tabBarIcon: ({focused}) => {
+          tabBarIcon: ( { focused } ) => {
             return (
-              <View style={{justifyContent: 'center', alignItems: 'center'}}>
+              <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                 <FastImage
-                  source={require('../image/Home.png')}
-                  style={{height: 20, width: 20}}
+                  source={require( '../image/Home.png' )}
+                  style={{
+                    height: focused === true ? heightPercentageToDP( 4 ) : heightPercentageToDP( 2.5 ),
+                    width: focused === true ? heightPercentageToDP( 4 ) : heightPercentageToDP( 2.5 )
+                  }}
                   resizeMode={FastImage.resizeMode.stretch}
                 />
+                <Text style={{
+                  color: 'white',
+                  fontSize: heightPercentageToDP( 1.35 ),
+                }}>Home</Text>
               </View>
             );
           },
         }}
       />
+
       <Tab.Screen
         name="chat"
         component={InboxList}
         options={{
           headerShown: false,
-          tabBarIcon: ({focused}) => {
+          tabBarIcon: ( { focused } ) => {
             return (
-              <View style={{justifyContent: 'center', alignItems: 'center'}}>
+              <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                 <FastImage
-                  source={require('../image/Chat.png')}
-                  style={{height: 20, width: 20}}
+                  source={require( '../image/Chat.png' )}
+                  style={{ height: focused === true ? heightPercentageToDP( 4 ) : heightPercentageToDP( 2.5 ), width: focused === true ? heightPercentageToDP( 4 ) : heightPercentageToDP( 2.5 ) }}
                   resizeMode={FastImage.resizeMode.stretch}
                 />
+                <Text
+                  ellipsizeMode='Tail'
+                  numberOfLines={1}
+                  style={{
+                    color: 'white',
+                    fontSize: widthPercentageToDP( 2.35 ),
+                  }}>Friends & Family</Text>
               </View>
             );
           },
@@ -71,26 +89,27 @@ export default function BottomTab() {
         component={AddPost}
         options={{
           headerShown: false,
-          tabBarIcon: ({focused}) => {
+          tabBarIcon: ( { focused } ) => {
             return (
               <View
                 style={{
                   justifyContent: 'center',
                   alignItems: 'center',
                   position: 'absolute',
-                  bottom: moderateScale(15),
+                  bottom: moderateScale( 15 ),
                 }}>
                 <FastImage
-                  source={require('../image/Plusbutton.png')}
+                  source={require( '../image/Plusbutton.png' )}
                   style={{
-                    height: moderateScale(70),
-                    width: moderateScale(70),
-                    borderWidth: moderateScale(1),
-                    borderRadius: moderateScale(70),
+                    height: moderateScale( 70 ),
+                    width: moderateScale( 70 ),
+                    borderWidth: moderateScale( 1 ),
+                    borderRadius: moderateScale( 70 ),
                     borderColor: '#c4c4c4',
                   }}
                   resizeMode={FastImage.resizeMode.stretch}
                 />
+
               </View>
             );
           },
@@ -102,14 +121,21 @@ export default function BottomTab() {
         component={Group}
         options={{
           headerShown: false,
-          tabBarIcon: ({focused}) => {
+          tabBarIcon: ( { focused } ) => {
             return (
-              <View style={{justifyContent: 'center', alignItems: 'center'}}>
+              <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                 <FastImage
-                  source={require('../image/Users.png')}
-                  style={{height: 20, width: 20}}
+                  source={require( '../image/Users.png' )}
+                  style={{ height: focused === true ? heightPercentageToDP( 4 ) : heightPercentageToDP( 2.5 ), width: focused === true ? heightPercentageToDP( 4 ) : heightPercentageToDP( 2.5 ) }}
                   resizeMode={FastImage.resizeMode.stretch}
                 />
+                <Text
+                  ellipsizeMode='Tail'
+                  numberOfLines={1}
+                  style={{
+                    color: 'white',
+                    fontSize: widthPercentageToDP( 2.35 ),
+                  }}>Home town</Text>
               </View>
             );
           },
@@ -121,14 +147,22 @@ export default function BottomTab() {
         component={Notification}
         options={{
           headerShown: false,
-          tabBarIcon: ({focused}) => {
+          tabBarIcon: ( { focused } ) => {
             return (
-              <View style={{justifyContent: 'center', alignItems: 'center'}}>
+              <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                 <FastImage
-                  source={require('../image/Notification.png')}
-                  style={{height: 20, width: 20}}
+                  source={require( '../image/Notification.png' )}
+                  style={{ height: focused === true ? heightPercentageToDP( 4 ) : heightPercentageToDP( 2.5 ), width: focused === true ? heightPercentageToDP( 4 ) : heightPercentageToDP( 2.5 ) }}
                   resizeMode={FastImage.resizeMode.stretch}
                 />
+                <Text
+                  ellipsizeMode='Tail'
+                  numberOfLines={1}
+                  style={{
+                    color: 'white',
+                    fontSize: widthPercentageToDP( 2.35 ),
+                  }}>Work location</Text>
+                {/*  */}
               </View>
             );
           },
@@ -138,4 +172,3 @@ export default function BottomTab() {
   );
 }
 
-const styles = StyleSheet.create({});

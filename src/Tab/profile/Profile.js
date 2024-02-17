@@ -1,7 +1,26 @@
+// import React from 'react';
+// import { View, Text } from 'react-native';
+// import Header from '../../../../comp/Header';
+
+// export default function Profile ( { navigation } ) {
+// 	return (
+// 		<View style={{flex:1, backgroundColor:'#E6EEFA'}}>
+// 			<Header
+// 				navigation={navigation}
+// 				label={'My Profile'}
+// 			/>
+// 			<View style={{flex:1}}>
+
+
+// 			</View>
+// 		</View>
+// 	);
+// }
+
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable prettier/prettier */
 import React, { useEffect, useLayoutEffect, useState } from 'react';
-import {
+import { 
   Text,
   TouchableOpacity,
   StyleSheet,
@@ -12,11 +31,11 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
-import { moderateScale } from '../utils/overAllNormalization';
+import { moderateScale } from '../../utils/overAllNormalization';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import DropDownPicker from 'react-native-dropdown-picker';
-import { AuthContext } from '../Navigation/AuthProvider';
+import { AuthContext } from '../../Navigation/AuthProvider';
 import axios from 'axios';
 import ImagePicker from 'react-native-image-crop-picker';
 import Snackbar from 'react-native-snackbar';
@@ -166,7 +185,7 @@ const EditProfile = ( { route } ) => {
     <View style={{ backgroundColor: '#fff', flex: 1 }}>
       <TouchableOpacity onPress={() => nav.goBack()}>
         <FastImage
-          source={require( '../image/Allowleft.png' )}
+          source={require( '../../image/Allowleft.png' )}
           style={{
             height: moderateScale( 50 ),
             width: moderateScale( 50 ),
@@ -189,7 +208,7 @@ const EditProfile = ( { route } ) => {
             position: 'absolute',
           }}>
           <FastImage
-            source={require( '../image/PencilSimple.png' )}
+            source={require( '../../image/PencilSimple.png' )}
             style={{
               height: moderateScale( 25 ),
               width: moderateScale( 25 ),
