@@ -20,6 +20,8 @@ import Profile from './profile/Profile';
 // 
 import ImageComp from '../comp/ImageComp'
 import Fsize from '../comp/Fsize'
+import InboxList from '../Screens/InboxList';
+import Group from '../Screens/Group';
 
 
 const Drawer = createDrawerNavigator();
@@ -59,17 +61,45 @@ export default function DrawerNavigator ( { navigation } ) {
       />
 
       <Drawer.Screen
+        name="chat"
+        component={InboxList}
+        options={{
+          drawerLabel: () => (
+            <DrawerItemLabel
+              label={"Messages"}
+              drawerIcon={require( '../image/chat.png' )}
+            />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
         name="Profile"
         component={Profile}
         options={{
           drawerLabel: () => (
             <DrawerItemLabel
               label={"Profile"}
-              drawerIcon={require( '../image/user.png' )}
+              drawerIcon={require( '../image/profile.png' )}
             />
           ),
         }}
       />
+
+      <Drawer.Screen
+        name="Group"
+        component={Group}
+        options={{
+          drawerLabel: () => (
+            <DrawerItemLabel
+              label={"Group"}
+              drawerIcon={require( '../image/groupq.png' )}
+            />
+          ),
+        }}
+      />
+
+      {/* Group */}
 
       <Drawer.Screen
         name="Account"
@@ -122,6 +152,8 @@ export default function DrawerNavigator ( { navigation } ) {
           ),
         }}
       />
+
+
 
     </Drawer.Navigator>
   );

@@ -8,6 +8,7 @@ export default function Account ({ navigation } ) {
 			<Header
 				navigation={navigation}
 				label={'My Account'}
+				backBtn={true}
 			/>
 			<View style={{ flex: 1 }}>
 

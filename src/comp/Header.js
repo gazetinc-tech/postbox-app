@@ -5,7 +5,7 @@ import { heightPercentageToDP, widthPercentageToDP } from 'react-native-responsi
 import { useSelector } from 'react-redux';
 import ImageComp from './ImageComp';
 
-export default function Header ( { navigation, label } ) {
+export default function Header ( { navigation, label, backBtn } ) {
 	return (
 		<View
 			style={{
@@ -15,20 +15,27 @@ export default function Header ( { navigation, label } ) {
 				alignItems: 'center',
 				backgroundColor: '#611EBD'
 			}}>
+
 			<TouchableOpacity
 				onPress={() => navigation.goBack()}>
-				{/* <FastImage
-					source={require( '../image/arrow-left.png' )}
-					style={{ height: 40, width: 40, tintColor: '#FFFFFF' }}
-					resizeMode={FastImage.resizeMode.stretch}
-				/> */}
-				<ImageComp
-					source={require( '../image/arrow-left.png' )}
-					height={3}
-					width={heightPercentageToDP( 3 )}
-					mode={'contain'}
-					style={{ tintColor: '#FFFFFF' }}
-				/>
+				{backBtn === true ?
+					<ImageComp
+						source={require( '../image/arrow-left.png' )}
+						height={3}
+						width={heightPercentageToDP( 3 )}
+						mode={'contain'}
+						style={{ tintColor: '#FFFFFF' }}
+					/>
+					:
+					<TouchableOpacity
+						onPress={() => { navigation.openDrawer() }}>
+						<FastImage
+							source={require( '../image/Menu.png' )}
+							style={{ height: 40, width: 40 }}
+							resizeMode={FastImage.resizeMode.stretch}
+						/>
+					</TouchableOpacity>
+				}
 			</TouchableOpacity>
 
 

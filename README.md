@@ -81,10 +81,8 @@ To learn more about React Native, take a look at the following resources:
 
 
 
-1.comment on post>>>>> show text>>>>post comment
-2>show instant >>>
 3> upload video
-4>follow user>>
+4>follow user>>:::status is not chaging from the incoming backend json
 5>local:--- nearby posts
 6> remove bookmark>>>
 7> customized 

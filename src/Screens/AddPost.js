@@ -109,7 +109,10 @@ const AddPost = ({route}) => {
   useEffect(() => {
     fetchData();
   }, [search]);
+
+
   const fetchData = async token => {
+    console.log('search:::::::::::::::::::::::::::::::', search)
     setLoading(true);
     const apiUrl = BaseUrl + `/search-users?term=${search}`;
     try {
@@ -133,6 +136,8 @@ const AddPost = ({route}) => {
       setLoading(false);
     }
   };
+
+
   const [selectedUserIds, setSelectedUserIds] = useState([]);
 
   const handleAdd = userId => {

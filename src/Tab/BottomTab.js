@@ -12,6 +12,9 @@ import Group from '../Screens/Group';
 import { moderateScale } from '../utils/overAllNormalization';
 import Notification from '../Screens/Notification';
 import { heightPercentageToDP, widthPercentageToDP } from 'react-native-responsive-screen';
+import FriendsAndFamily from './FriendsAndFamily';
+import HomeTown from './HomeTown';
+import WorkLocation from './WorkLocation';
 
 const Tab = createBottomTabNavigator();
 
@@ -60,17 +63,22 @@ export default function BottomTab () {
       />
 
       <Tab.Screen
-        name="chat"
-        component={InboxList}
+        name="FriendsAndFamily"
+        component={FriendsAndFamily}
         options={{
           headerShown: false,
           tabBarIcon: ( { focused } ) => {
             return (
               <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                 <FastImage
-                  source={require( '../image/Chat.png' )}
-                  style={{ height: focused === true ? heightPercentageToDP( 4 ) : heightPercentageToDP( 2.5 ), width: focused === true ? heightPercentageToDP( 4 ) : heightPercentageToDP( 2.5 ) }}
+                  source={require( '../image/fnf.png' )}
+                  style={{
+                    height: focused === true ? heightPercentageToDP( 4 ) : heightPercentageToDP( 2.5 ),
+                    width: focused === true ? heightPercentageToDP( 4 ) : heightPercentageToDP( 2.5 ),
+                    // tinitColor:'#FFFFFF'
+                  }}
                   resizeMode={FastImage.resizeMode.stretch}
+                  tintColor={'#FFFFFF'}
                 />
                 <Text
                   ellipsizeMode='Tail'
@@ -117,17 +125,18 @@ export default function BottomTab () {
       />
 
       <Tab.Screen
-        name="user"
-        component={Group}
+        name="HomeTown"
+        component={HomeTown}
         options={{
           headerShown: false,
           tabBarIcon: ( { focused } ) => {
             return (
               <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                 <FastImage
-                  source={require( '../image/Users.png' )}
+                  source={require( '../image/HomeTown.png' )}
                   style={{ height: focused === true ? heightPercentageToDP( 4 ) : heightPercentageToDP( 2.5 ), width: focused === true ? heightPercentageToDP( 4 ) : heightPercentageToDP( 2.5 ) }}
                   resizeMode={FastImage.resizeMode.stretch}
+                  tintColor={'#FFFFFF'}
                 />
                 <Text
                   ellipsizeMode='Tail'
@@ -143,17 +152,18 @@ export default function BottomTab () {
       />
 
       <Tab.Screen
-        name="Notification"
-        component={Notification}
+        name="WorkLocation"
+        component={WorkLocation}
         options={{
           headerShown: false,
           tabBarIcon: ( { focused } ) => {
             return (
               <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                 <FastImage
-                  source={require( '../image/Notification.png' )}
+                  source={require( '../image/workLocation.png' )}
                   style={{ height: focused === true ? heightPercentageToDP( 4 ) : heightPercentageToDP( 2.5 ), width: focused === true ? heightPercentageToDP( 4 ) : heightPercentageToDP( 2.5 ) }}
                   resizeMode={FastImage.resizeMode.stretch}
+                  tintColor={'#FFFFFF'}
                 />
                 <Text
                   ellipsizeMode='Tail'

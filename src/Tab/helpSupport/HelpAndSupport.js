@@ -8,6 +8,7 @@ export default function HelpAndSupport ({ navigation } ) {
 			<Header
 				navigation={navigation}
 				label={'Help And Support'}
+				backBtn={true}
 			/>
 			<View style={{ flex: 1 }}>
 

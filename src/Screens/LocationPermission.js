@@ -22,6 +22,7 @@ const LocationPermission = ({route}) => {
   const nav = useNavigation();
   const handlePermission = async Permission => {
     request(Permission).then(result => {
+      console.log('Location:::::::::::::::::::', result)
       console.log(result);
       nav.navigate('CameraPermission');
     });

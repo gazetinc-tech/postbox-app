@@ -303,11 +303,8 @@ function Dashboard ( { navigation } ) {
         .then( ( response ) => {
           if ( response.status === 200 ) {
             return response.json();
-            // console.log(response.json(), 'success:::::::::::');
           } else {
-            // throw new Error(`HTTP error! Status: ${response.status}`);
             console.log( '::ERROR IN POST comment::' )
-            // return response.json();
           }
         } )
         .then( ( json ) => {

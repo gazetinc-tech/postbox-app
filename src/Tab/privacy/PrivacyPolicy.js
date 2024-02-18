@@ -8,8 +8,10 @@ export default function PrivacyPolicy ({ navigation } ) {
 			<Header
 				navigation={navigation}
 				label={'Privacy Policy'}
+				backBtn={true}
 			/>
 			<View style={{ flex: 1 }}>
+				
 
 			</View>
 		</View>

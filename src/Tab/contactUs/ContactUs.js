@@ -8,6 +8,7 @@ export default function ContactUs ({ navigation } ) {
 			<Header
 				navigation={navigation}
 				label={'Contact Us'}
+				backBtn={true}
 			/>
 			<View style={{ flex: 1 }}>
 
