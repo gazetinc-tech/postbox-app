@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import React, {useEffect, useRef} from 'react';
 import {useSelector} from 'react-redux';
-import {useNavigation} from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import {moderateScale} from '../utils/overAllNormalization';
 import {Menu} from 'react-native-paper';
@@ -20,9 +19,8 @@ import Snackbar from 'react-native-snackbar';
 import axios from 'axios';
 import moment from 'moment';
 
-export default function Status({route}) {
+export default function Status({route, navigation}) {
   const data = route?.params;
-  const nav = useNavigation();
   const progressBar = useRef(new Animated.Value(0));
   const timeoutRef = useRef(null);
   const {BaseUrl} = React.useContext(AuthContext);
@@ -39,8 +37,8 @@ export default function Status({route}) {
       duration: 5000,
       useNativeDriver: false,
     }).start(({finished}) => {
-      if (finished) {
-        nav.goBack(null);
+      if(finished) {
+        navigation.goBack();
       }
     });
   };
@@ -53,7 +51,7 @@ export default function Status({route}) {
     startProgressBar();
     timeoutRef.current = setTimeout(() => {
       stopProgressBar();
-      nav.goBack(null);
+      navigation.goBack();
     }, 5000);
   }, []);
 
@@ -70,6 +68,7 @@ export default function Status({route}) {
     startProgressBar();
     clearTimeout(timeoutRef.current);
   };
+
   const handelRemoveStory = id => {
     try {
       axios
@@ -82,8 +81,8 @@ export default function Status({route}) {
         })
         .then(response => {
           // console.log(response?.data, 'GetUserDetails');
-          if (response?.data?.status === 200) {
-            nav.navigate('Home');
+          if(response?.data?.status === 200) {
+            navigation.navigate('Home');
             Snackbar.show({
               text: `${response?.data?.message}`,
               textColor: 'green',
@@ -92,10 +91,11 @@ export default function Status({route}) {
             });
           }
         });
-    } catch (error) {
+    } catch(error) {
       console.log(error, 'error');
     }
   };
+
   return (
     <View
       style={{
@@ -175,7 +175,7 @@ export default function Status({route}) {
             </Text>
           </Text>
           {profile?.id !== data?.user_id ? (
-            <TouchableOpacity onPress={() => nav.goBack(null)}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
               <FastImage
                 source={require('../image/cut.png')}
                 style={{

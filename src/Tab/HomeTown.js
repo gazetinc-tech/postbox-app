@@ -35,7 +35,7 @@ export default function HomeTown ( { navigation } ) {
 
 	useEffect( () => {
 		// fetchData( 'a' );
-		console.log( 'userLocation:::::::::::::::::::', profile?.village );
+		console.log( 'userLocation:::::::::::::::::::', profile?.village );  
 		if ( profile ) {
 			var location = profile?.city
 			setLocation( location );
@@ -45,7 +45,7 @@ export default function HomeTown ( { navigation } ) {
 
 	const fetchData = async ( location ) => {
 		setLoading( true );
-		const apiUrl = BaseUrl + `/search-users?term=${ location }`;
+		const apiUrl = BaseUrl + `/search-users?term=${ location }`; 
 
 		fetch( apiUrl, {
 			method: 'GET',
@@ -63,8 +63,8 @@ export default function HomeTown ( { navigation } ) {
 			.then( ( json ) => {
 				if ( json?.status === 200 ) {
 					setLoading( false );
-					console.log( 'resp::::::::::::::::::::nn', json?.data )
-					var allPostx = json?.data?.users;
+					console.log( 'resp::::::::::::::::::::nnzzzzzzzzzzzzzz', json )
+					var allPostx = json?.users;
 					// Create an object to store unique data based on email
 					const uniqueData = {};
 					// Iterate through each user data
@@ -141,7 +141,7 @@ export default function HomeTown ( { navigation } ) {
 											color: '#687684',
 											fontFamily: 'AvenirMedium',
 										}}>
-										{`No people found in the village ${ location }`}
+										{`No people found in the Home Town Name ${ location }`}
 									</Text>
 								</View>
 							</>

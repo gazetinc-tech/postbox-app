@@ -555,7 +555,8 @@ const Myprofile = ({route}) => {
                           color: '#000',
                           marginRight: moderateScale(5),
                         }}>
-                        {item?.text}
+                        {/* {item?.text} */}
+                        {item?.text == 'hidetext' ? '' : item.text}
                       </Text>
                       <FlatList
                         horizontal

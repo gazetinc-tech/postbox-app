@@ -40,8 +40,9 @@ export default function FriendsAndFamily ( { navigation } ) {
 	}, [ isFocused ] );
 
 
-	const getFollowers = async ( id ) => {
-		fetch( `https://shopninja.in/anurag/postbox/api/user/get-followers?user_id=${ id }`, {
+	const getContactPosts = async ( id ) => {
+
+		fetch( `https://shopninja.in/anurag/postbox/api/user/contacts-posts`, {
 			method: 'GET',
 			headers: {
 				Authorization: `Bearer ${ userToken }`,
@@ -55,40 +56,40 @@ export default function FriendsAndFamily ( { navigation } ) {
 				}
 			} )
 			.then( ( json ) => {
-				console.log( 'get followersData::::::::::', json );
+				console.log( 'get getContactPosts::::::::::', json );
 				setLoading( false );
 				setFollowersData( json?.followers )
 			} )
 			.catch( ( error ) => {
-				console.log( '=== ERROR followers ===', error );
+				console.log( '=== ERROR getContactPosts ===', error );
 			} );
 
 	}
 
 
-	const getFollowing = async ( id ) => {
-		fetch( `https://shopninja.in/anurag/postbox/api/user/get-followings?user_id=${ id }`, {
-			method: 'GET',
-			headers: {
-				Authorization: `Bearer ${ userToken }`,
-			},
-		} )
-			.then( ( response ) => {
-				if ( response.status === 200 ) {
-					return response.json();
-				} else {
-					return response.json();
-				}
-			} )
-			.then( ( json ) => {
-				console.log( 'get following Data::::::::::', json );
-				setLoading( false );
-				setFollowersData( json?.followings )
-			} )
-			.catch( ( error ) => {
-				console.log( '=== ERROR following ===', error );
-			} );
-	}
+	// const getFollowing = async ( id ) => {
+	// 	fetch( `https://shopninja.in/anurag/postbox/api/user/get-followings?user_id=${ id }`, {
+	// 		method: 'GET',
+	// 		headers: {
+	// 			Authorization: `Bearer ${ userToken }`,
+	// 		},
+	// 	} )
+	// 		.then( ( response ) => {
+	// 			if ( response.status === 200 ) {
+	// 				return response.json();
+	// 			} else {
+	// 				return response.json();
+	// 			}
+	// 		} )
+	// 		.then( ( json ) => {
+	// 			console.log( 'get following Data::::::::::', json );
+	// 			setLoading( false );
+	// 			setFollowingData( json?.followings )
+	// 		} )
+	// 		.catch( ( error ) => {
+	// 			console.log( '=== ERROR following ===', error );
+	// 		} );
+	// }
 
 	return (
 		<View style={{
@@ -99,8 +100,11 @@ export default function FriendsAndFamily ( { navigation } ) {
 				label={'Friends And Family'}
 			/>
 
+
+
+
 			{/* feeds zone */}
-			<View
+			{/* <View
 				style={{
 					flex: 1,
 					backgroundColor: '#fff',
@@ -136,7 +140,7 @@ export default function FriendsAndFamily ( { navigation } ) {
 										color: '#FFFFFF',
 										fontWeight: selected === 0 ? '700' : '500',
 										fontSize: selected === 0 ? heightPercentageToDP( 2 ) : heightPercentageToDP( 1.2 ),
-									}}>Followers</Text>
+									}}>Followers ({followersData.length})</Text>
 								</LinearGradient>
 							</TouchableOpacity>
 
@@ -159,7 +163,7 @@ export default function FriendsAndFamily ( { navigation } ) {
 										color: '#FFFFFF',
 										fontWeight: selected === 1 ? '700' : '500',
 										fontSize: selected === 1 ? heightPercentageToDP( 2 ) : heightPercentageToDP( 1.2 ),
-									}}>Following</Text>
+									}}>Following ({followingData.length})</Text>
 								</LinearGradient>
 							</TouchableOpacity>
 						</View>
@@ -168,19 +172,21 @@ export default function FriendsAndFamily ( { navigation } ) {
 
 
 						{selected === 0 &&
-
 							<View style={{ flex: 1 }}>
 								{followersData.length > 0 ? (
 									<FlatList
 										contentContainerStyle={{ paddingBottom: moderateScale( 200 ) }}
 										style={{ flex: 1 }}
-										data={selected === 0 ? followersData : followingData}
+										data={followersData}
 										renderItem={( { item, index } ) => {
 											return (
 												<View
 													key={index}
 													style={{}}>
-
+													<ProfileCard
+														data={item}
+														onPress={() => navigation.navigate( 'OtherProfile', { item: item } )}
+													/>
 												</View>
 											);
 										}}
@@ -218,6 +224,10 @@ export default function FriendsAndFamily ( { navigation } ) {
 												<View
 													key={index}
 													style={{}}>
+													<ProfileCard
+														data={item}
+														onPress={() => navigation.navigate( 'OtherProfile', { item: item } )}
+													/>
 
 												</View>
 											);
@@ -247,7 +257,9 @@ export default function FriendsAndFamily ( { navigation } ) {
 						}
 					</>
 				)}
-			</View>
+			</View> */}
+
+
 		</View>
 	);
 }

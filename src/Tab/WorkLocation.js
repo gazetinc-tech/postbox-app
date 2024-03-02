@@ -38,7 +38,7 @@ export default function WorkLocation ( { navigation } ) {
 		// fetchData( 'a' );
 		console.log( 'userLocation:::::::::::::::::::', profile );
 		if ( profile ) {
-			var location = profile?.village
+			var location = profile?.city 
 			setLocation( location )
 			fetchData( location );
 		}
@@ -64,8 +64,7 @@ export default function WorkLocation ( { navigation } ) {
 			.then( ( json ) => {
 				if ( json?.status === 200 ) {
 					setLoading( false );
-					console.log( 'resp::::::::::::::::::::nn', json?.data )
-					var allPostx = json?.data?.users;
+					var allPostx = json?.users;
 					// Create an object to store unique data based on email
 					const uniqueData = {};
 					// Iterate through each user data
@@ -143,7 +142,7 @@ export default function WorkLocation ( { navigation } ) {
 											color: '#687684',
 											fontFamily: 'AvenirMedium',
 										}}>
-										{`No people found in the village ${ location }`}
+										{`No people found in the City Name ${ location }`}
 									</Text>
 								</View>
 							</>

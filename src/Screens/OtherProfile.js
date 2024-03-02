@@ -10,13 +10,14 @@ import {
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { moderateScale } from '../utils/overAllNormalization';
-import { useNavigation } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import VideoPlayer from './VideoPlayer';
 import { useSelector } from 'react-redux';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 // import {FlatList} from 'react-native-gesture-handler';
 
 const OtherProfile = ( { route } ) => {
+  const isFocused = useIsFocused()
   const nav = useNavigation();
   const item = route?.params?.item;
   const user_id = item?.user_id ? item.user_id : item?.id;
@@ -44,7 +45,7 @@ const OtherProfile = ( { route } ) => {
   useEffect( () => {
     getUserData();
     getUserPost();
-  }, [ user_id ] )
+  }, [ user_id,isFocused ] )
 
   // get user details:::
   const getUserData = async () => {
@@ -78,7 +79,7 @@ const OtherProfile = ( { route } ) => {
   const followUser = ( id ) => {
     console.log( 'isFollowing', id );
     new Promise( ( resolve, reject ) => {
-      fetch( `https://shopninja.in/anurag/postbox/api/user/toggle-post-like?post_id=${ id }`, {
+      fetch( `https://shopninja.in/anurag/postbox/api/user/toggle-follow?cust_id=${ id }`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${ token }`,

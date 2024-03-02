@@ -22,6 +22,7 @@ import ImageComp from '../comp/ImageComp'
 import Fsize from '../comp/Fsize'
 import InboxList from '../Screens/InboxList';
 import Group from '../Screens/Group';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const Drawer = createDrawerNavigator();
@@ -179,7 +180,9 @@ const Feed2 = ( { ...props } ) => {
     ] );
   };
 
-  const confirmLogout = () => {
+  const confirmLogout = async () => {
+    await AsyncStorage.clear();
+
     dispatch(
       updateUserDetails( {
         isLogin: false,

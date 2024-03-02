@@ -1,3 +1,9 @@
+
+<!-- todos for the applications -->
+<!-- search MapApiKey and replace it with the client gmail google map key -->
+
+
+
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
 # Getting Started
@@ -81,8 +87,9 @@ To learn more about React Native, take a look at the following resources:
 
 
 
-3> upload video
-4>follow user>>:::status is not chaging from the incoming backend json
-5>local:--- nearby posts
-6> remove bookmark>>>
-7> customized 
+
+
+
+upload video:::
+facebook:::
+

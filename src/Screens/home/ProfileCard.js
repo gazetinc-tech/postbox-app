@@ -30,8 +30,8 @@ export default function ProfileCard ( { onPress, data } ) {
 				<Text numberOfLines={1} style={styles.nameTextCandidate}>{data?.name}</Text>
 				<Text numberOfLines={3} ellipsizeMode='tail' style={styles.availableTextCandidate}>{data?.bio}</Text>
 
-				<RenderItem title={'village'} desc={data?.village} />
-				<RenderItem title={'mandal'} desc={data?.mandal} />
+				<RenderItem title={'City Name'} desc={data?.village} />
+				<RenderItem title={'Local Area'} desc={data?.mandal} />
 				<RenderItem title={'city'} desc={data?.city} />
 				<RenderItem title={'state'} desc={data?.state} />
 				<RenderItem title={'country'} desc={data?.country} />

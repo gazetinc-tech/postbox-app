@@ -123,7 +123,7 @@ const AuthProvider = ( { children, navigation } ) => {
 
         select,
 
-        handleSocialLogin: async ( userInfo ) => {
+        handleSocialLogin: async ( userInfo, nav ) => {
           setLoading( true );
           var form = new FormData();
           form.append( 'email', userInfo?.user?.email );
@@ -141,16 +141,11 @@ const AuthProvider = ( { children, navigation } ) => {
               // console?.log( response, 'login' );
               if ( response?.data?.status === 200 ) {
                 setLoading( false );
-                console.log( 'hiiiiiiiiiiiii1111zzz11111', response?.data )
-
                 setUserToken( response?.data?.accessToken );
                 AsyncStorage.setItem( 'userToken', response?.data?.accessToken );
-                dispatch(
-                  updateUserDetails( {
-                    isLogin: true,
-                    token: response?.data?.accessToken,
-                  } ),
-                );
+                // setTimeout( () => {
+                nav.navigate( 'CompleteProfile', { token: response?.data?.accessToken, user: userInfo?.user } )
+                // }, 400 );
                 Snackbar.show( {
                   text: `${ response?.data?.message }`,
                   textColor: '#002570',
@@ -184,10 +179,10 @@ const AuthProvider = ( { children, navigation } ) => {
 
         },
 
-        signup: async ( firstName, lastName, email, password, nav ) => {
+        signup: async ( firstName, lastName, email, password, nav, phone, countryCode ) => {
           setLoading( true );
           var form = new FormData();
-          form.append( 'name', firstName + ' ' + lastName);
+          form.append( 'name', firstName + ' ' + lastName );
           form.append( 'email', email );
           form.append( 'password', password );
           form.append( 'device_id', '1234' );
@@ -200,7 +195,7 @@ const AuthProvider = ( { children, navigation } ) => {
               },
             } )
             .then( response => {
-              console.log( response?.data?.customer, 'sssssssssss' );
+              console.log( response?.data, 'sssssssssss' );
               setLoading( false );
               if ( response?.data?.status === 200 ) {
                 setUserToken( response?.data?.accessToken );
@@ -210,7 +205,7 @@ const AuthProvider = ( { children, navigation } ) => {
                     token: response?.data?.accessToken,
                   } ),
                 );
-                nav.navigate( 'OTPScreen' );
+                nav.navigate( 'OTPScreen', { countryCode: countryCode, phone: phone } );
               } else if ( response?.data?.status === 400 ) {
                 Snackbar.show( {
                   text: `${ response.data?.message } Please Login`,

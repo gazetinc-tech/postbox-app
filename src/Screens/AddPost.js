@@ -10,19 +10,21 @@ import {
   TextInput,
   FlatList,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import {moderateScale} from '../utils/overAllNormalization';
-import BottomSheet, {BottomSheetScrollView} from '@gorhom/bottom-sheet';
-import {useNavigation, DrawerActions} from '@react-navigation/native';
 import ImagePicker from 'react-native-image-crop-picker';
 import {useDispatch, useSelector} from 'react-redux';
 import {AuthContext} from '../Navigation/AuthProvider';
 import Snackbar from 'react-native-snackbar';
 import axios from 'axios';
-import {Actionsheet, useDisclose} from 'native-base';
+import {useDisclose} from 'native-base';
+import {heightPercentageToDP, widthPercentageToDP} from 'react-native-responsive-screen';
+import AddRemoveUser from '../comp/AddRemoveUser';
+import HeaderWithSearch from '../comp/HeaderWithSearch';
 
-const AddPost = ({route}) => {
+const AddPost = ({route, navigation}) => {
   const sheetRef = useRef(null);
   const [number, onChangeNumber] = useState('');
   const snapPoints = useMemo(() => ['25%', '50%', '90%'], []);
@@ -33,9 +35,33 @@ const AddPost = ({route}) => {
   const {isOpen, onOpen, onClose} = useDisclose();
   const [search, setSearch] = useState('');
   const [modal, setModal] = useState(false);
-  const [postStatus, setPostStatus] = useState('2');
-  const navigation = useNavigation();
+  const [postStatus, setPostStatus] = useState('1');
+  // const navigation = useNavigation();
   const [files, setFiles] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [selectedUserIds, setSelectedUserIds] = useState([]);
+  const [selectedUserData, setSelectedUserData] = useState([]);
+
+
+  const handleAdd = userId => {
+    var id = userId?.id;
+    setSelectedUserIds(prevSelectedIds => [...prevSelectedIds, id]);
+    setSelectedUserData(selectedUserData => [...selectedUserData, userId])
+  };
+
+  const handleRemove = userId => {
+    var idx = userId?.id;
+
+    setSelectedUserIds(prevSelectedIds =>
+      prevSelectedIds.filter(id => id !== idx),
+    );
+
+    var indexToRemove = selectedUserData.findIndex(item => item.id === idx);
+    if(indexToRemove !== -1) {
+      selectedUserData.splice(indexToRemove, 1);
+    }
+  };
+
   const handleFilePicker = async fileType => {
     ImagePicker.openPicker({
       mediaType: fileType,
@@ -57,16 +83,16 @@ const AddPost = ({route}) => {
       setFiles(newArray);
     });
   };
+
   const AddOutFitType = async () => {
     setLoading(true);
     var form = new FormData();
     const userIdsString = selectedUserIds.join(',');
     form.append('header', postStatus);
     form.append('cust_ids', userIdsString);
-    form.append('text', number);
+    form.append('text', number.length == 0 ? 'hidetext' : number);
     files.map(item => form.append('images[]', item));
-    console?.log(form, 'form', userToken, `${BaseUrl}/add-post`);
-    // LOG  {"_parts": [["header", "2"], ["cust_ids", ""], ["text", ""], ["images[]", [Object]]]} form 966|p29yTlQ3emQozzucPgrJXyGqbPuLvAeqOj4vfVTEf61995a6 https://shopninja.in/anurag/postbox/api/user/add-post
+
     await axios
       .post(BaseUrl + '/add-post', form, {
         headers: {
@@ -75,25 +101,34 @@ const AddPost = ({route}) => {
           'Content-Type': 'multipart/form-data',
         },
       })
-      .then(response => {
-        console.log(response?.data, 'vvvvvvvvvvvv');
-        setLoading(false);
-        if (response) {
-          setFiles([]);
-          onChangeNumber('');
-          navigation.navigate('Home');
-          Snackbar.show({
-            text: `${response?.data?.message}`,
-            textColor: 'green',
-            numberOfLines: 1,
-            backgroundColor: '#fff',
-          });
-          //   navigation.goBack();
+      .then(json => {
+        if(json) {
+          if(json?.status == 200) {
+            console.log(json?.data, 'vvvvvvvvvvvv1');
+            setLoading(false);
+            setFiles([]);
+            onChangeNumber('');
+            navigation.navigate('Home');
+            Snackbar.show({
+              text: `${json?.data?.message}`,
+              textColor: 'green',
+              numberOfLines: 1,
+              backgroundColor: '#fff',
+            });
+          } else {
+            setLoading(false);
+            Snackbar.show({
+              text: `Oops!!, something went wrong`,
+              textColor: 'green',
+              numberOfLines: 1,
+              backgroundColor: '#fff',
+            });
+          }
         }
       })
       .catch(error => {
         setLoading(false);
-        if (error) {
+        if(error) {
           console?.log(error, 'vvvvvvvvvvvv');
           Snackbar.show({
             text: `Something Went Wrong`,
@@ -104,12 +139,10 @@ const AddPost = ({route}) => {
         }
       });
   };
-  const [users, setUsers] = useState([]);
 
   useEffect(() => {
     fetchData();
   }, [search]);
-
 
   const fetchData = async token => {
     console.log('search:::::::::::::::::::::::::::::::', search)
@@ -125,188 +158,182 @@ const AddPost = ({route}) => {
           },
         })
         .then(response => {
-          if (response?.status === 200) {
+          if(response?.status === 200) {
             console.log(response?.data?.users, 'resp');
             setUsers(response?.data?.users);
           }
         });
-    } catch (error) {
+    } catch(error) {
       console.log(error, 'error');
     } finally {
       setLoading(false);
     }
   };
 
-
-  const [selectedUserIds, setSelectedUserIds] = useState([]);
-
-  const handleAdd = userId => {
-    setSelectedUserIds(prevSelectedIds => [...prevSelectedIds, userId]);
-  };
-
-  const handleRemove = userId => {
-    setSelectedUserIds(prevSelectedIds =>
-      prevSelectedIds.filter(id => id !== userId),
-    );
-  };
-
   return (
     <View style={{backgroundColor: '#611EBD', flex: 1}}>
-      <View
-        style={{
-          justifyContent: 'space-between',
-          padding: 15,
-          flexDirection: 'row',
-          alignItems: 'center',
-        }}>
-        <TouchableOpacity
-          onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
-          <FastImage
-            source={require('../image/Menu.png')}
-            style={{height: 40, width: 40}}
-            resizeMode={FastImage.resizeMode.stretch}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{
-            justifyContent: 'center',
-            alignItems: 'center',
-            flexDirection: 'column',
-          }}>
-          <Text
-            style={{
-              fontSize: 20,
-              fontWeight: '400',
-              fontFamily: 'Actor-Regular',
-              color: '#fff',
-            }}>
-            {profile?.name}
-          </Text>
-        </TouchableOpacity>
 
-        <TouchableOpacity
-          //@ts-ignore
-          onPress={() => navigation.navigate('SearchScreen')}
-          style={{
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          <FastImage
-            source={require('../image/search.png')}
-            resizeMode={FastImage.resizeMode.stretch}
-            style={{height: 45, width: 45}}
-          />
-        </TouchableOpacity>
-      </View>
+      {/* headers */}
+      <HeaderWithSearch navigation={navigation} title={profile?.name} />
+
       <View
         style={{
+          flex: 1,
           backgroundColor: '#fff',
           width: '100%',
-          height: '85%',
-          zIndex: 1000,
-          flex: 1,
           borderTopLeftRadius: moderateScale(40),
           borderTopRightRadius: moderateScale(40),
-          padding: moderateScale(20),
-          marginTop: '10%',
+          padding: heightPercentageToDP(2),
+          marginTop: heightPercentageToDP(1)
         }}>
-        <ScrollView>
+
+
+        <ScrollView contentContainerStyle={{flex: 1}}>
+
           <View
             style={{
               backgroundColor: '#E6EEFA',
               padding: moderateScale(20),
               borderRadius: moderateScale(40),
             }}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}>
-              <FastImage
-                source={{uri: profile?.avatar}}
-                resizeMode={FastImage.resizeMode.contain}
+
+            {/* row one */}
+            <View>
+              <View
                 style={{
-                  height: moderateScale(50),
-                  width: moderateScale(50),
-                  borderRadius: moderateScale(50),
-                }}
-              />
-              <TouchableOpacity
-                onPress={() => setModal(!modal)}
-                style={{
-                  backgroundColor: '#E3CFFF',
                   flexDirection: 'row',
                   alignItems: 'center',
-                  padding: moderateScale(5),
-                  borderRadius: moderateScale(7.5),
+                  justifyContent: 'space-between',
                 }}>
-                <FastImage
-                  source={
-                    postStatus === '1'
-                      ? require('../image/public.png')
+
+                {/* profile picture */}
+                <View style={{
+                  height: heightPercentageToDP(8),
+                  width: heightPercentageToDP(8),
+                  overflow: 'hidden',
+                }}>
+                  <FastImage
+                    source={{uri: profile?.avatar}}
+                    resizeMode='cover'
+                    style={{
+                      height: heightPercentageToDP(7.5),
+                      width: heightPercentageToDP(7.5),
+                      borderRadius: heightPercentageToDP(3.75),
+                    }}
+                  />
+                </View>
+
+                {/* public/friends/group */}
+                <TouchableOpacity
+                  onPress={() => setModal(!modal)}
+                  style={{
+                    backgroundColor: '#E3CFFF',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    padding: moderateScale(5),
+                    borderRadius: moderateScale(7.5),
+                  }}>
+                  <FastImage
+                    source={
+                      postStatus === '1'
+                        ? require('../image/public.png')
+                        : postStatus === '2'
+                          ? require('../image/UsersColor.png')
+                          : require('../image/UsersThree.png')
+                    }
+                    style={{
+                      height: moderateScale(15),
+                      width: moderateScale(15),
+                      marginRight: moderateScale(5),
+                    }}
+                    resizeMode={FastImage.resizeMode.stretch}
+                  />
+                  <Text
+                    style={{
+                      color: '#611EBD',
+                      fontSize: moderateScale(14),
+                      fontFamily: 'AvenirMedium',
+                      marginRight: moderateScale(5),
+                    }}>
+                    {postStatus === '1'
+                      ? 'Public'
                       : postStatus === '2'
-                      ? require('../image/UsersColor.png')
-                      : require('../image/UsersThree.png')
-                  }
+                        ? 'Friends'
+                        : 'Group'}
+                  </Text>
+                  <FastImage
+                    source={require('../image/CaretDown.png')}
+                    style={{
+                      height: moderateScale(15),
+                      width: moderateScale(15),
+                    }}
+                    resizeMode={FastImage.resizeMode.stretch}
+                  />
+                </TouchableOpacity>
+
+                {/* tag peiple */}
+                <TouchableOpacity
+                  onPress={onOpen}
                   style={{
-                    height: moderateScale(15),
-                    width: moderateScale(15),
-                    marginRight: moderateScale(5),
-                  }}
-                  resizeMode={FastImage.resizeMode.stretch}
-                />
-                <Text
-                  style={{
-                    color: '#611EBD',
-                    fontSize: moderateScale(14),
-                    fontFamily: 'AvenirMedium',
-                    marginRight: moderateScale(5),
+                    backgroundColor: '#E3CFFF',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    padding: moderateScale(5),
+                    borderRadius: moderateScale(7.5),
                   }}>
-                  {postStatus === '1'
-                    ? 'Public'
-                    : postStatus === '2'
-                    ? 'Friends'
-                    : 'Group'}
-                </Text>
-                <FastImage
-                  source={require('../image/CaretDown.png')}
-                  style={{
-                    height: moderateScale(15),
-                    width: moderateScale(15),
+                  <Text
+                    style={{
+                      color: '#611EBD',
+                      fontSize: moderateScale(14),
+                      fontFamily: 'AvenirMedium',
+                      marginRight: moderateScale(5),
+                    }}>
+                    Tag People
+                  </Text>
+                  <FastImage
+                    source={require('../image/Tag.png')}
+                    style={{
+                      height: moderateScale(15),
+                      width: moderateScale(15),
+                    }}
+                    resizeMode={FastImage.resizeMode.stretch}
+                  />
+                </TouchableOpacity>
+
+              </View>
+
+              {/* current selected user */}
+              <View style={{
+                // alignItems: 'center',
+              }}>
+                <FlatList
+                  contentContainerStyle={{
+                    marginTop: heightPercentageToDP(1)
                   }}
-                  resizeMode={FastImage.resizeMode.stretch}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                // disabled
-                onPress={onOpen}
-                style={{
-                  backgroundColor: '#E3CFFF',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  padding: moderateScale(5),
-                  borderRadius: moderateScale(7.5),
-                }}>
-                <Text
-                  style={{
-                    color: '#611EBD',
-                    fontSize: moderateScale(14),
-                    fontFamily: 'AvenirMedium',
-                    marginRight: moderateScale(5),
-                  }}>
-                  Tag People
-                </Text>
-                <FastImage
-                  source={require('../image/Tag.png')}
-                  style={{
-                    height: moderateScale(15),
-                    width: moderateScale(15),
+                  horizontal={true}
+                  data={selectedUserData}
+                  renderItem={({item, index}) => {
+                    return (
+                      <View style={{
+                        width: widthPercentageToDP(35),
+                        marginLeft: widthPercentageToDP(3),
+                      }}>
+                        <AddRemoveUser
+                          horizontal={true}
+                          index={index}
+                          item={item}
+                          selectedUserIds={selectedUserIds}
+                          handleRemove={(val) => {handleRemove(val)}}
+                          handleAdd={(val) => {handleAdd(val)}}
+                        />
+                      </View>
+                    );
                   }}
-                  resizeMode={FastImage.resizeMode.stretch}
                 />
-              </TouchableOpacity>
+              </View>
             </View>
+
+            {/* public dropdown */}
             {modal === true ? (
               <View
                 style={{
@@ -410,6 +437,8 @@ const AddPost = ({route}) => {
                 </TouchableOpacity>
               </View>
             ) : null}
+
+            {/* what's on your head */}
             <TextInput
               style={styles.input}
               onChangeText={onChangeNumber}
@@ -421,14 +450,17 @@ const AddPost = ({route}) => {
               keyboardType="default"
               placeholderTextColor={'#737373'}
             />
+
+            {/* images video and gif */}
             <View
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
-                marginTop: moderateScale(10),
+                // marginTop: moderateScale(10),
                 justifyContent: 'space-around',
               }}>
               <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                {/* images */}
                 <TouchableOpacity
                   onPress={() => handleFilePicker('image')}
                   style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -452,6 +484,8 @@ const AddPost = ({route}) => {
                     image
                   </Text>
                 </TouchableOpacity>
+
+                {/* videos */}
                 <TouchableOpacity
                   onPress={() => handleFilePicker('video')}
                   style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -475,6 +509,8 @@ const AddPost = ({route}) => {
                     Videos
                   </Text>
                 </TouchableOpacity>
+
+                {/* gif */}
                 <TouchableOpacity
                   onPress={() => handleFilePicker('video')}
                   style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -500,31 +536,36 @@ const AddPost = ({route}) => {
               </View>
             </View>
           </View>
+
+          {/*showing selected imaged/videos  */}
           <View style={{marginTop: moderateScale(20)}}>
             <FlatList
               data={files}
               horizontal
-              // numColumns={3}
               keyExtractor={(i, j) => j}
               renderItem={({item, index}) => {
                 return (
                   <View
                     key={index}
                     style={{
-                      height: moderateScale(80),
-                      width: moderateScale(80),
                       marginRight: moderateScale(5),
                       borderRadius: moderateScale(10),
+                      height: moderateScale(200),
+                      width: moderateScale(100),
                     }}>
                     <FastImage
                       source={{uri: item?.uri}}
-                      resizeMode={FastImage.resizeMode.contain}
+                      resizeMode='contain'
                       style={{
-                        height: moderateScale(80),
-                        width: moderateScale(80),
+                        flex: 1,
+                        height: moderateScale(200),
+                        width: moderateScale(100),
                         borderRadius: moderateScale(10),
+                        borderWidth: heightPercentageToDP(0.025),
+                        backgroundColor: '#454545'
                       }}
                     />
+
                     <TouchableOpacity
                       onPress={() => {
                         const updatedArray = files.filter(
@@ -536,7 +577,8 @@ const AddPost = ({route}) => {
                         position: 'absolute',
                         top: moderateScale(5),
                         right: moderateScale(5),
-                        backgroundColor: ' #000000730',
+                        // backgroundColor: ' #000000730',
+                        backgroundColor: 'red'
                       }}>
                       <FastImage
                         source={require('../image/cut.png')}
@@ -553,6 +595,7 @@ const AddPost = ({route}) => {
               }}
             />
           </View>
+
           {loading ? (
             <TouchableOpacity
               disabled
@@ -600,100 +643,67 @@ const AddPost = ({route}) => {
           )}
         </ScrollView>
       </View>
-      <Actionsheet isOpen={isOpen} onClose={onClose}>
-        <Actionsheet.Content
-          style={{
-            backgroundColor: '#ffffff',
-            width: '100%',
-            alignItems: 'flex-end',
-          }}>
-          <>
-            <View style={{width: '95%'}}>
-              <TextInput
-                placeholder="Search by name"
-                style={styles.inputActionSheet}
-                placeholderTextColor={'#D1D0D0'}
-                value={search}
-                onChangeText={text => setSearch(text)}
-              />
+
+
+      {/* tag people modal screen */}
+      <Modal
+        visible={isOpen}
+        onRequestClose={onClose}
+        transparent
+        animationType='slide'
+      >
+        <View style={styles.main}>
+          <TouchableOpacity
+            style={{
+              justifyContent: 'flex-end',
+              flex: 1,
+            }}
+            onPressOut={onClose}
+            activeOpacity={1}
+          >
+            <View style={styles.whiteArea}>
+              <TouchableOpacity
+                activeOpacity={1}
+                onPress={() => {}}>
+                <View style={{width: widthPercentageToDP(100), alignItems: 'center', paddingTop: heightPercentageToDP(2)}}>
+                  <View>
+                    <TextInput
+                      placeholder="Search by name"
+                      style={styles.inputActionSheet}
+                      placeholderTextColor={'#D1D0D0'}
+                      value={search}
+                      onChangeText={text => setSearch(text)}
+                    />
+                  </View>
+
+                  <FlatList
+                    contentContainerStyle={{
+                      // width: '100%',
+                      maxheight: heightPercentageToDP(60),
+                      paddingHorizontal: widthPercentageToDP(4)
+                    }}
+                    data={users}
+                    renderItem={({item, index}) => {
+                      return (
+                        <AddRemoveUser
+                          horizontal={false}
+                          index={index}
+                          item={item}
+                          selectedUserIds={selectedUserIds}
+                          handleRemove={(val) => {handleRemove(val)}}
+                          handleAdd={(val) => {handleAdd(val)}}
+                        />
+                      );
+                    }}
+                  />
+                </View>
+              </TouchableOpacity>
             </View>
 
-            <Actionsheet.Item
-              style={{width: '100%', backgroundColor: '#ffffff'}}>
-              <FlatList
-                contentContainerStyle={{width: '100%'}}
-                data={users}
-                renderItem={({item, index}) => {
-                  return (
-                    <View
-                      key={index}
-                      style={{
-                        width: '100%',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        paddingVertical: moderateScale(10),
-                        borderBottomWidth: moderateScale(2),
-                        borderBottomColor: '#E6EEFA',
-                      }}>
-                      <View
-                        style={{flexDirection: 'row', alignItems: 'center'}}>
-                        <FastImage
-                          source={
-                            item?.avatar
-                              ? {uri: item?.avatar}
-                              : require('../image/SHiV.png')
-                          }
-                          style={{
-                            height: moderateScale(30),
-                            width: moderateScale(30),
-                            borderRadius: moderateScale(50),
-                            marginRight: moderateScale(10),
-                          }}
-                          resizeMode={FastImage.resizeMode.stretch}
-                        />
-                        <View style={{flexDirection: 'column'}}>
-                          <Text
-                            style={{
-                              fontSize: moderateScale(16),
-                              color: '#000',
-                              fontFamily: 'AvenirMedium',
-                            }}>
-                            {item?.name}
-                          </Text>
-                        </View>
-                      </View>
-                      {selectedUserIds.includes(item.id) ? (
-                        <TouchableOpacity
-                          onPress={() => handleRemove(item.id)}
-                          style={{
-                            backgroundColor: '#FF0000', // Red color for remove button
-                            paddingVertical: moderateScale(5),
-                            paddingHorizontal: moderateScale(10),
-                            borderRadius: moderateScale(10),
-                          }}>
-                          <Text>Remove</Text>
-                        </TouchableOpacity>
-                      ) : (
-                        <TouchableOpacity
-                          onPress={() => handleAdd(item.id)}
-                          style={{
-                            backgroundColor: '#611EBD',
-                            paddingVertical: moderateScale(5),
-                            paddingHorizontal: moderateScale(10),
-                            borderRadius: moderateScale(10),
-                          }}>
-                          <Text>Add</Text>
-                        </TouchableOpacity>
-                      )}
-                    </View>
-                  );
-                }}
-              />
-            </Actionsheet.Item>
-          </>
-        </Actionsheet.Content>
-      </Actionsheet>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+
     </View>
   );
 };
@@ -701,17 +711,38 @@ const AddPost = ({route}) => {
 export default AddPost;
 const styles = StyleSheet.create({
   input: {
-    // height: moderateScale(40),
-    margin: moderateScale(10),
+    marginTop: heightPercentageToDP(1.5),
     color: '#000',
     fontSize: moderateScale(14),
-    padding: moderateScale(10),
-    marginBottom: moderateScale(100),
+    paddingHorizontal: widthPercentageToDP(4),
+    marginBottom: moderateScale(30),
+    borderWidth: heightPercentageToDP(0.1),
+    borderRadius: heightPercentageToDP(2)
   },
   inputActionSheet: {
     backgroundColor: '#f2f2f2',
     color: '#262626',
+    width: widthPercentageToDP(92),
     paddingHorizontal: moderateScale(10),
     borderRadius: moderateScale(10),
   },
+
+  main: {
+    flex: 1,
+    backgroundColor: '#000000aa',
+    justifyContent: 'flex-end',
+
+  },
+  whiteArea: {
+    maxHeight: heightPercentageToDP(60),
+    backgroundColor: '#FFFFFF',
+    borderTopStartRadius: heightPercentageToDP(4),
+    borderTopEndRadius: heightPercentageToDP(4),
+    width: widthPercentageToDP(100),
+    paddingTop: heightPercentageToDP(2),
+    paddingBottom: heightPercentageToDP(3),
+    alignItems: "center",
+  },
+
+
 });

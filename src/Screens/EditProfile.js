@@ -325,13 +325,13 @@ const EditProfile = ( { route } ) => {
             fontFamily: 'AvenirMedium',
             marginBottom: moderateScale( 5 ),
           }}>
-          Edit Your Mandal (India Only)
+          Edit Your Local Area (India Only)
         </Text>
         <TextInput
           style={styles.input}
           onChangeText={text => setProfiles( { ...profiles, mandal: text } )}
           value={profiles?.mandal}
-          placeholder="Type your Mandal"
+          placeholder="Type your Local Area"
           keyboardType="email-address"
         />
 
@@ -342,13 +342,13 @@ const EditProfile = ( { route } ) => {
             fontFamily: 'AvenirMedium',
             marginBottom: moderateScale( 5 ),
           }}>
-          Edit Your Village (India Only)
+          Edit Your City Name (India Only)
         </Text>
         <TextInput
           style={styles.input}
           onChangeText={text => setProfiles( { ...profiles, village: text } )}
           value={profiles?.village}
-          placeholder="Type your Village"
+          placeholder="Type your City Name"
           keyboardType="email-address"
         />
         {/* 

@@ -36,8 +36,8 @@ import { useDispatch } from 'react-redux';
 const SignInScnd = ( { route } ) => {
   const navigator = useNavigation();
   const dispatch = useDispatch();
-  const [ number, onChangeNumber ] = React.useState( '' );
-  const [ psword, onPsword ] = React.useState( '' );
+  const [ number, onChangeNumber ] = React.useState( 'cubiprodev@gmail.com' );
+  const [ psword, onPsword ] = React.useState( 'Homeshop@18' );
   const { handleSocialLogin, login, loading, SetSelect } = React.useContext( AuthContext );
   const loginUser = () => {
     if ( !isValidEmail( number ) ) {
@@ -69,14 +69,14 @@ const SignInScnd = ( { route } ) => {
       offlineAccess: true, // if you want to access Google API on behalf of the user FROM YOUR SERVER
     } );
   }, [] );
-  
+
   const google_login = async () => {
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
       console.log( "google userInfo :::", userInfo );
       // add api to do login
-      handleSocialLogin( userInfo );
+      handleSocialLogin( userInfo, navigator );
     } catch ( error ) {
       if ( error.code === statusCodes.SIGN_IN_CANCELLED ) {
         console.log( "user cancelled the login flow" );
@@ -93,53 +93,53 @@ const SignInScnd = ( { route } ) => {
 
 
   // facebook login:----
-  // const Facebook_Login = async () => {
-  //   // Attempt login with permissions
-  //   try {
-  //     const result = await LoginManager.logInWithPermissions( [ "public_profile", "email" ] );
-  //     console.log( "facebook resoult :::", result );
-  //     if ( result.isCancelled ) {
-  //       console.log( "user cancelled the login flow" );
-  //       return;
-  //     }
-  //     // Once signed in, get the users AccesToken
-  //     const data = await AccessToken.getCurrentAccessToken();
-  //     if ( !data ) {
-  //       console.log( "unable to get users acces token" );
-  //       return;
-  //     }
-  //     const facebookCredential: any = await auth.FacebookAuthProvider.credential( data.accessToken );
-  //     console.log( "facebook credential :::", facebookCredential );
-  //     const infoRequest = new GraphRequest( "/me", {
-  //       accessToken: facebookCredential?.accessToken,
-  //       parameters: {
-  //         fields: {
-  //           string: "email,name,first_name,middle_name,last_name",
-  //         },
-  //       },
-  //     }, ( error: any, result: any ) => {
-  //       if ( error ) {
-  //         console.log( "*** error ***", error );
-  //       } else {
-  //         console.log( "*** result ***", result );
-  //         // API
-  //         let objBody: oProps = {
-  //           trainee_name: result?.name,
-  //           social_media_id: result?.id,
-  //           social_media_type: facebookCredential?.providerId,
-  //         };
-  //         console.log( "*** objBody ***", objBody );
-  //         // api to do facebook login
+  const Facebook_Login = async () => {
+    // Attempt login with permissions
+    // try {
+    //   const result = await LoginManager.logInWithPermissions( [ "public_profile", "email" ] );
+    //   console.log( "facebook resoult :::", result );
+    //   if ( result.isCancelled ) {
+    //     console.log( "user cancelled the login flow" );
+    //     return;
+    //   }
+    //   // Once signed in, get the users AccesToken
+    //   const data = await AccessToken.getCurrentAccessToken();
+    //   if ( !data ) {
+    //     console.log( "unable to get users acces token" );
+    //     return;
+    //   }
+    //   const facebookCredential = await auth.FacebookAuthProvider.credential( data.accessToken );
+    //   console.log( "facebook credential :::", facebookCredential );
+    //   const infoRequest = new GraphRequest( "/me", {
+    //     accessToken: facebookCredential?.accessToken,
+    //     parameters: {
+    //       fields: {
+    //         string: "email,name,first_name,middle_name,last_name",
+    //       },
+    //     },
+    //   }, ( error: any, result: any ) => {
+    //     if ( error ) {
+    //       console.log( "*** error ***", error );
+    //     } else {
+    //       console.log( "*** result ***", result );
+    //       // API
+    //       let objBody: oProps = {
+    //         trainee_name: result?.name,
+    //         social_media_id: result?.id,
+    //         social_media_type: facebookCredential?.providerId,
+    //       };
+    //       console.log( "*** objBody ***", objBody );
+    //       // api to do facebook login
 
 
-  //       }
-  //     }
-  //     );
-  //     new GraphRequestManager().addRequest( infoRequest ).start();
-  //   } catch ( e ) {
-  //     console.log( "facebook sign in error" );
-  //   }
-  // };
+    //     }
+    //   }
+    //   );
+    //   new GraphRequestManager().addRequest( infoRequest ).start();
+    // } catch ( e ) {
+    //   console.log( "facebook sign in error" );
+    // }
+  };
 
 
   return (
@@ -232,7 +232,7 @@ const SignInScnd = ( { route } ) => {
             textAlign: 'right',
             marginBottom: moderateScale( 40 ),
           }}>
-          Forgor Password?
+          Forgot Password?
         </Text>
         <Text
           style={{
@@ -300,7 +300,7 @@ const SignInScnd = ( { route } ) => {
         <TouchableOpacity
           activeOpacity={0.9}
           style={[ styles.google, { marginTop: heightPercentageToDP( 3 ), alignItems: 'center', justifyContent: 'center' } ]}
-          onPress={() => {}}
+          onPress={() => {Facebook_Login()}}
         >
           <View style={styles.gLogoView}>
             <Image

@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable prettier/prettier */
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ImageBackground,
   StatusBar,
@@ -13,10 +13,11 @@ import {
   Image,
   ActivityIndicator,
   Platform,
+  PermissionsAndroid,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { moderateScale } from '../utils/overAllNormalization';
-import { useNavigation } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import Snackbar from 'react-native-snackbar';
 import axios from 'axios';
 import { AuthContext } from '../Navigation/AuthProvider';
@@ -25,10 +26,15 @@ import ImagePicker from 'react-native-image-crop-picker';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { updateUserDetails } from '../../redux/reducers/userReducer';
 import { useDispatch } from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Geolocation from '@react-native-community/geolocation';
+import Geocoder from 'react-native-geocoding';
 
 const CompleteProfile = ( { route } ) => {
   const nav = useNavigation();
   const dispatch = useDispatch();
+  const isFocused = useIsFocused();
+
 
   const initialState = {
     name: '',
@@ -49,14 +55,22 @@ const CompleteProfile = ( { route } ) => {
   const [ image, setImage ] = useState( '' );
   const [ mime, setMime ] = useState( '' );
   const [ fname, setFname ] = useState( '' );
+  const [ firstName, setFirstName ] = useState( '' );
+  const [ lastName, setLastName ] = useState( '' );
+
+  useEffect( () => {
+    setProfile( initialState );
+    setFirstName( '' );
+    setLastName( '' )
+
+  }, [ isFocused ] )
+
   const [ items, setItems ] = useState( [
     { label: 'Male', value: '1' },
     { label: 'Female', value: '2' },
     { label: 'Other', value: '3' },
   ] );
 
-  const [ firstName, setFirstName ] = useState( '' );
-  const [ lastName, setLastName ] = useState( '' );
 
   const takePhotoFromCamera = () => {
     ImagePicker.openCamera( {
@@ -122,6 +136,7 @@ const CompleteProfile = ( { route } ) => {
               isLogin: true,
             } ),
           );
+
           Snackbar.show( {
             text: `${ response?.data?.message }`,
             textColor: 'green',
@@ -144,6 +159,7 @@ const CompleteProfile = ( { route } ) => {
         }
       } );
   };
+
   const onSubmit = () => {
     if ( image === '' ) {
       return Snackbar.show( {
@@ -196,14 +212,14 @@ const CompleteProfile = ( { route } ) => {
       } );
     } else if ( profile?.mandal === '' ) {
       return Snackbar.show( {
-        text: `Enter Your Mandal`,
+        text: `Enter Your Local Area`,
         textColor: 'red',
         numberOfLines: 1,
         backgroundColor: '#fff',
       } );
     } else if ( profile?.village === '' ) {
       return Snackbar.show( {
-        text: `Enter Your village`,
+        text: `Enter Your City Name`,
         textColor: 'red',
         numberOfLines: 1,
         backgroundColor: '#fff',
@@ -212,6 +228,180 @@ const CompleteProfile = ( { route } ) => {
       AddOutFitType();
     }
   };
+
+  useEffect( () => {
+    if ( route?.params?.token !== undefined ) {
+      var token = route?.params?.token;
+      var user = route?.params?.user;
+      console.log( 'token:::::::::::::::1', token )
+      console.log( 'user:::::::::::::::2', user )
+      dispatch(
+        updateUserDetails( {
+          token: token,
+        } ),
+      );
+      setFirstName( user?.givenName );
+      setLastName( user?.familyName );
+
+    }
+
+    const getData = async () => {
+      try {
+        const jsonValue = await AsyncStorage.getItem( 'user' );
+        var abc = jsonValue != null ? JSON.parse( jsonValue ) : null;
+        if ( abc ) {
+          console.log( 'userDAta::::::::::::::::::::::::::::1', abc );
+          setFirstName( abc?.firstName )
+          setLastName( abc?.lastName )
+        }
+      } catch ( e ) {
+
+      }
+    };
+
+    getData();
+    requestLocationPermission();
+
+
+    // 
+    const getUser = () => {
+      setLoading( true );
+      try {
+        axios
+          .get( BaseUrl + '/profile', {
+            headers: {
+              Authorization: `Bearer ${ token }`,
+              Accept: 'application/json',
+              'Content-Type': 'multipart/form-data',
+            },
+          } )
+          .then( response => {
+            setLoading( false );
+            if ( response?.status === 200 ) {
+              console.log( response?.data?.user, 'resp:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::' );
+              dispatch(
+                updateUserDetails( {
+                  profile: response?.data?.user,
+                  isLogin: true,
+                } ),
+              );
+              if ( response?.data?.user?.avatar ) {
+
+              }
+            }
+          } );
+      } catch ( error ) {
+        setLoading( false );
+        console.log( error, 'error' );
+      }
+    };
+
+    getUser();
+
+  }, [ isFocused, route ] )
+
+
+  // lcoaiton
+  const requestLocationPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+      );
+      console.log( 'granted:::::::', granted );
+      if ( granted === PermissionsAndroid.RESULTS.GRANTED ) {
+        console.log( 'You can use the Location' );
+        getAndroidLocation();
+      }
+      if ( granted.toLocaleLowerCase() === 'location permission denied' ) {
+        // setMessage( 'Please turn on device location' );
+        // setNormalModal( true )
+        console.log( 'permission denied::::::::::::::' )
+      }
+    } catch ( err ) {
+      console.warn( 'err:::::', err );
+    }
+  };
+
+  // maps
+  var MapApiKey = 'AIzaSyAyu-6Pv7RaiohWH1bWpQqwXbx7roNG_GA';
+  // var GOOGLE_PACES_API_BASE_URL = 'https://maps.googleapis.com/maps/api/place';
+
+
+
+  // Initialize the module (needs to be done only once)
+  Geocoder.init( MapApiKey ); // use a valid API key
+
+  const getAndroidLocation = async () => {
+    console.log( 'hi::::::::::' );
+    // setIsLocationModalVisible( false );
+    console.log( 'hi:::::::::: 1' );
+
+    Geolocation.getCurrentPosition(
+      ( pos ) => {
+        console.log( 'pos:::::', pos );
+        // {"coords": {"accuracy": 92.9000015258789, "altitude": 201.5, "heading": 0, "latitude": 28.3909772, "longitude": 77.0495543, "speed": 0}, "extras": {"networkLocationType": "wifi"}, "mocked": false, "timestamp": 1708972475725}
+
+        var lat = pos?.coords?.latitude;
+        var long = pos?.coords?.longitude;
+        console.log( lat, long );
+        updateAddress( lat, long );
+      },
+      ( error ) => {
+        JSON.stringify( error )
+        console.log( 'hi::::::::::3', error );
+        if ( error?.message.toLowerCase() === 'no location provider available.' ) {
+          console.log( 'Hi::::::::::zz' )
+          setMessage( 'Please turn on device location' );
+          setNormalModal( true )
+        }
+      } );
+  };
+
+
+
+  // converting the lat long to the address
+  async function updateAddress ( latitude, longitude ) {
+    try {
+      const response = await Geocoder.from( latitude, longitude );
+      const address = response.results[ 0 ].formatted_address;
+
+      // Extract components from the address
+      const addressComponents = response.results[ 0 ].address_components;
+      let city, state, country;
+
+      for ( let i = 0; i < addressComponents.length; i++ ) {
+        const component = addressComponents[ i ];
+
+        if ( component.types.includes( 'locality' ) ) {
+          city = component.long_name;
+        } else if ( component.types.includes( 'administrative_area_level_1' ) ) {
+          state = component.long_name;
+        } else if ( component.types.includes( 'country' ) ) {
+          country = component.long_name;
+        }
+      }
+
+      //   name: '',
+      // gender: '',
+      // avatar: '',
+      // country: '',
+      // state: '',
+      // city: '',
+      // mandal: '',
+      // village: '',
+      console.log( 'City:', city );
+      console.log( 'State:', state );
+      console.log( 'Country:', country );
+      setProfile( { ...profile, city: city, state: state, country: country } );
+
+      // return { city, state, country };
+    } catch ( error ) {
+      console.error( 'Error getting address:', error );
+      return null;
+    }
+  }
+
+
   return (
     <View style={{ backgroundColor: '#611EBD', flex: 1 }}>
       <Text
@@ -394,13 +584,13 @@ const CompleteProfile = ( { route } ) => {
               color: '#611EBD',
               fontFamily: 'AvenirMedium',
             }}>
-            Your Mandal (India Only)
+            Your Local (India Only)
           </Text>
           <TextInput
             style={styles.input}
             onChangeText={text => setProfile( { ...profile, mandal: text } )}
             value={profile?.mandal}
-            placeholder="Type your mandal"
+            placeholder="Type your Local Area"
             keyboardType="email-address"
             placeholderTextColor={'#8B8A8A'}
           />
@@ -416,7 +606,7 @@ const CompleteProfile = ( { route } ) => {
             style={styles.input}
             onChangeText={text => setProfile( { ...profile, village: text } )}
             value={profile?.village}
-            placeholder="Type your Village"
+            placeholder="Type your City Name"
             keyboardType="email-address"
             placeholderTextColor={'#8B8A8A'}
           />
