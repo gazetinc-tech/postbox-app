@@ -1,22 +1,30 @@
-
-<!-- web starter:-static
-standard web:- statctic
-semi customised web:--1 page dynamic
-customised web :--8-10 page static	2 dynamic -->
-
-<!-- 2web company -->
-
-
-<!-- domain -->
-
-
-
-
-
-
 <!-- pending -->
-
-<!-- modify the hometown/friends and family/ work location page -->
 <!-- facebook login -->
-<!-- modify the add comment popup -->
+<!-- share content is not working properly-->
 
+
+
+
+<!-- postbox -->
+<!-- modify the
+	dahboard:::Done
+	friends and family::WIP
+	hometown:::pending
+	work location page:::Pending--!>
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- PLANNING -->
+<!-- sharing content is static -->
+<!-- when we post comment we need to refresh the feed that's no user friendly -->
+<!-- notification ?-->
+<!-- messages ?-->

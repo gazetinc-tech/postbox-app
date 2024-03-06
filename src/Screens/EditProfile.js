@@ -351,7 +351,7 @@ const EditProfile = ( { route } ) => {
           placeholder="Type your City Name"
           keyboardType="email-address"
         />
-        {/* 
+        {/*
         <Text
           style={{
             fontSize: moderateScale(16),

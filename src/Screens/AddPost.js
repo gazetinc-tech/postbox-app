@@ -62,13 +62,14 @@ const AddPost = ({route, navigation}) => {
     }
   };
 
-  const handleFilePicker = async fileType => {
+  const handleFilePicker = async => {
     ImagePicker.openPicker({
-      mediaType: fileType,
+      mediaType: 'photo',
       width: 300,
       height: 500,
       multiple: true,
-      cropping: fileType === 'video' ? false : true,
+      compressImageQuality: 0.7,
+      cropping: true,
     }).then(image => {
       console.log(image);
       const newArray = image.map(item => {
@@ -83,6 +84,33 @@ const AddPost = ({route, navigation}) => {
       setFiles(newArray);
     });
   };
+
+  const handleFilePickerVideo = async => {
+    ImagePicker.openPicker({
+      mediaType: 'video',
+      width: 300,
+      height: 500,
+      multiple: true,
+      compressImageQuality: 0.5,
+      cropping: false,
+    }).then(image => {
+      console.log(image);
+      const newArray = image.map(item => {
+        const pathArray = item.path.split('/');
+        const fname = pathArray.pop();
+        return {
+          uri: item.path,
+          type: item.mime,
+          name: fname,
+        };
+      });
+      setFiles(newArray);
+    });
+  };
+
+
+
+
 
   const AddOutFitType = async () => {
     setLoading(true);
@@ -487,7 +515,7 @@ const AddPost = ({route, navigation}) => {
 
                 {/* videos */}
                 <TouchableOpacity
-                  onPress={() => handleFilePicker('video')}
+                  onPress={() => handleFilePickerVideo()}
                   style={{flexDirection: 'row', alignItems: 'center'}}>
                   <FastImage
                     source={require('../image/movie_creation.png')}

@@ -1,95 +1,66 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
-import { useSelector } from 'react-redux';
+import React, {useEffect, useRef, useState} from 'react';
+import {View, Text, FlatList, ActivityIndicator, TouchableOpacity} from 'react-native';
+import {useSelector} from 'react-redux';
 import axios from 'axios';
-import { useIsFocused } from '@react-navigation/native';
+import {useIsFocused} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { moderateScale } from '../utils/overAllNormalization';
+import {moderateScale} from '../utils/overAllNormalization';
 import Header from '../comp/Header';
 import ProfileCard from '../Screens/home/ProfileCard';
-import { heightPercentageToDP, widthPercentageToDP } from 'react-native-responsive-screen';
+import {heightPercentageToDP, widthPercentageToDP} from 'react-native-responsive-screen';
 import LinearGradient from 'react-native-linear-gradient';
 
 
-export default function FriendsAndFamily ( { navigation } ) {
+export default function FriendsAndFamily({navigation}) {
 	const isFocused = useIsFocused();
 	const BaseUrl = 'https://shopninja.in/anurag/postbox/api/user';
-	const { profile, token } = useSelector( state => state?.userReducer );
+	const {profile, token} = useSelector(state => state?.userReducer);
 
 
-	const [ userToken, setUserToken ] = useState( null );
-	const [ loading, setLoading ] = useState( true );
-	const [ allPost, setAllPost ] = useState( [] );
-	const [ selected, setSelected ] = useState( 0 );
-	const [ followersData, setFollowersData ] = useState( [] );
-	const [ followingData, setFollowingData ] = useState( [] );
+	const [userToken, setUserToken] = useState(null);
+	const [loading, setLoading] = useState(true);
+	const [allPost, setAllPost] = useState([]);
 
 
 	const getToken = async () => {
-		await AsyncStorage.getItem( 'userToken' ).then( value => {
-			if ( value !== null ) {
-				setUserToken( value );
-				getFollowers( profile?.id )
-				getFollowing( profile?.id );
+		await AsyncStorage.getItem('userToken').then(value => {
+			if(value !== null) {
+				setUserToken(value);
+				getContactPosts();
 			}
-		} );
+		});
 	};
 
-	useEffect( () => {
+	useEffect(() => {
 		getToken();
-	}, [ isFocused ] );
+	}, [isFocused]);
 
 
-	const getContactPosts = async ( id ) => {
-
-		fetch( `https://shopninja.in/anurag/postbox/api/user/contacts-posts`, {
+	const getContactPosts = async () => {
+		fetch(`https://shopninja.in/anurag/postbox/api/user/contacts-posts`, {
 			method: 'GET',
 			headers: {
-				Authorization: `Bearer ${ userToken }`,
+				Authorization: `Bearer ${userToken}`,
 			},
-		} )
-			.then( ( response ) => {
-				if ( response.status === 200 ) {
-					return response.json();
+		})
+			.then((response) => {
+				if(response.status === 200) {
+					return response;
 				} else {
-					return response.json();
+					return response;
 				}
-			} )
-			.then( ( json ) => {
-				console.log( 'get getContactPosts::::::::::', json );
-				setLoading( false );
-				setFollowersData( json?.followers )
-			} )
-			.catch( ( error ) => {
-				console.log( '=== ERROR getContactPosts ===', error );
-			} );
+			})
+			.then((json) => {
+				console.log('get getContactPosts::::::::::', json);
+				setLoading(false);
+				setAllPost(json?.followers)
+			})
+			.catch((error) => {
+				console.log('=== ERROR getContactPosts ===', error);
+			});
 
 	}
 
-
-	// const getFollowing = async ( id ) => {
-	// 	fetch( `https://shopninja.in/anurag/postbox/api/user/get-followings?user_id=${ id }`, {
-	// 		method: 'GET',
-	// 		headers: {
-	// 			Authorization: `Bearer ${ userToken }`,
-	// 		},
-	// 	} )
-	// 		.then( ( response ) => {
-	// 			if ( response.status === 200 ) {
-	// 				return response.json();
-	// 			} else {
-	// 				return response.json();
-	// 			}
-	// 		} )
-	// 		.then( ( json ) => {
-	// 			console.log( 'get following Data::::::::::', json );
-	// 			setLoading( false );
-	// 			setFollowingData( json?.followings )
-	// 		} )
-	// 		.catch( ( error ) => {
-	// 			console.log( '=== ERROR following ===', error );
-	// 		} );
-	// }
 
 	return (
 		<View style={{

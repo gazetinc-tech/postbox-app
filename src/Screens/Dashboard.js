@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Text,
-  Share,
   FlatList,
   StyleSheet,
   TextInput,
@@ -14,9 +13,11 @@ import {
   ActivityIndicator,
   Image,
   Modal,
+  ScrollView,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import {
+  useFocusEffect,
   useIsFocused,
 } from '@react-navigation/native';
 import {moderateScale} from '../utils/overAllNormalization';
@@ -36,6 +37,9 @@ import HeaderWithSearch from '../comp/HeaderWithSearch';
 import ShowImageComp from '../comp/ShowImageComp';
 import UserInfoComp from '../comp/UserInfoComp';
 import LikeCommentShare from '../comp/LikeCommentShare';
+import ImageComp from '../comp/ImageComp';
+import Share from 'react-native-share';
+
 
 function Dashboard({navigation}) {
   const isFocused = useIsFocused();
@@ -60,6 +64,29 @@ function Dashboard({navigation}) {
   const [postSelected, setPostSelected] = useState({});
   const [isPlaying, setIsPlaying] = useState(false);
   const [scrollDirection, setScrollDirection] = useState('up');
+
+  const scrollViewRef = useRef(null);
+
+  const scrollToTop = () => {
+    console.log('scrollToTop::::::::::::::::::::::::::::::::::::::::::::');
+    if(scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({y: 0, animated: true});
+    }
+  };
+
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     scrollToTop();
+  //     return () => {
+  //       // Optional cleanup function if needed
+  //     };
+  //   }, [])
+  // );
+
+  useEffect(() => {
+    console.log('go tp top:::::::')
+    scrollToTop();
+  }, [isFocused])
 
   const flatListRef = useRef(null);
 
@@ -152,27 +179,42 @@ function Dashboard({navigation}) {
     });
   };
 
-  const shareContent = async () => {
-    try {
-      const result = await Share.share({
-        title: 'Post-Box',
-        message: 'Check out this awesome Post-Box app!',
-        // url: 'https://example.com',
-        // subject: 'Share Link',
+  const shareContent = async (item) => {
+    console.log('item::::::::::::x', item)
+    let options = {
+      title: 'Post-Box',
+      message: `Check out this awesome Post-Box app! post from ${item?.creater_name}`,
+      id: item?.post_id,
+      subject: 'Share Link',
+    };
+    Share.open(options)
+      .then(res => {
+        console.log(res);
+      })
+      .catch(err => {
+        err && console.log(err);
       });
+    // try {
+    //   const result = await Share.share({
+    // title: 'Post-Box',
+    // message: `Check out this awesome Post-Box app! post from ${item?.creater_name}`,
+    // id: item?.post_id,
+    // subject: 'Share Link',
+    //   });
 
-      if(result.action === Share.sharedAction) {
-        if(result.activityType) {
-          console.log(`Shared via ${result.activityType}`);
-        } else {
-          console.log('Shared successfully');
-        }
-      } else if(result.action === Share.dismissedAction) {
-        console.log('Share sheet dismissed');
-      }
-    } catch(error) {
-      console.error('Error sharing:', error.message);
-    }
+    //   if(result.action === Share.sharedAction) {
+    //     z
+    //     if(result.activityType) {
+    //       console.log(`Shared via ${result.activityType}`);
+    //     } else {
+    //       console.log('Shared successfully');
+    //     }
+    //   } else if(result.action === Share.dismissedAction) {
+    //     console.log('Share sheet dismissed');
+    //   }
+    // } catch(error) {
+    //   console.error('Error sharing:', error.message);
+    // }
   };
 
   const handelCreateStory = async (i, m, f) => {
@@ -312,19 +354,19 @@ function Dashboard({navigation}) {
     })
   }
 
-  const handleScroll = (event) => {
-    const offsetY = event.nativeEvent.contentOffset.y;
-    const diff = offsetY - (this.offsetY || 0);
+  // const handleScroll = (event) => {
+  //   const offsetY = event.nativeEvent.contentOffset.y;
+  //   const diff = offsetY - (this.offsetY || 0);
 
-    if(diff > 0) {
-      setScrollDirection('down');
-      console.log('down:::::::::::')
-    } else if(diff < 0) {
-      setScrollDirection('up');
-      console.log('up:::::::::::')
-    }
-    this.offsetY = offsetY;
-  };
+  //   if(diff > 0) {
+  //     setScrollDirection('down');
+  //     console.log('down:::::::::::')
+  //   } else if(diff < 0) {
+  //     setScrollDirection('up');
+  //     console.log('up:::::::::::')
+  //   }
+  //   this.offsetY = offsetY;
+  // };
 
   useEffect(() => {
     getUser();
@@ -338,663 +380,703 @@ function Dashboard({navigation}) {
       {/* top header */}
       <HeaderWithSearch navigation={navigation} title={profile?.name} />
 
-      {scrollDirection === 'up' &&
+      {/* {scrollDirection === 'up' &&
         <>
-          <View>
 
-            {/* story user */}
-            {removedObject === undefined || removedObject === null ? (
-              <TouchableOpacity
-                onPress={() => {
-                  setUploade(true);
-                }}>
-                <View style={{paddingHorizontal: moderateScale(8)}}>
-
-                  <View style={styles.ppOutline}>
-                    {/* edit icon */}
-                    <View style={styles.addStory}>
-                      <FastImage
-                        source={require('../image/Plusbutton.png')}
-                        style={styles.pen}
-                        resizeMode={FastImage.resizeMode.contain}
-                      />
-                    </View>
-
-                    {/* pp */}
-                    <FastImage
-                      source={{uri: profile?.avatar}}
-                      style={styles.pp}
-                      resizeMode={FastImage.resizeMode.cover}
-                    />
-                  </View>
-                  <Text style={styles.you}>You</Text>
-                </View>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                onPress={() => {navigation.navigate('Status', removedObject, {key: 'you'})}}>
-                <View
-                  style={{
-                    paddingHorizontal: moderateScale(8),
-                    borderTopRightRadius: moderateScale(50),
-                  }}>
-                  <View style={[styles.ppOutline, {overflow: 'hidden', }]}>
-                    <FastImage
-                      source={{uri: removedObject?.avatar}}
-                      style={styles.pp}
-                      resizeMode={FastImage.resizeMode.cover}
-                    />
-                  </View>
-                </View>
-              </TouchableOpacity>
-            )}
-
-            {/* other users posts */}
-            <FlatList
-              data={story}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              renderItem={({item, index}) => {
-                return (
-                  <TouchableOpacity
-                    key={index}
-                    onPress={() => {
-                      navigation.navigate('Status', item);
-                    }}>
-                    <View
-                      style={{
-                        paddingHorizontal: moderateScale(8),
-                      }}>
-                      <View style={[styles.ppOutline, {overflow: 'hidden', }]}>
-                        <FastImage
-                          source={{uri: item?.avatar}}
-                          style={styles.pp}
-                          resizeMode={FastImage.resizeMode.cover}
-                        />
-                      </View>
-
-
-                      <Text
-                        style={{
-                          textAlign: 'center',
-                          fontSize: moderateScale(12),
-                          fontWeight: '700',
-                          color: '#FFF',
-                          width: moderateScale(60),
-                        }}
-                        numberOfLines={2}>
-                        {item?.username}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                );
-              }}
-              keyExtractor={item => item.id.toString()}
-            />
-          </View>
-
-          {/* whats on your head */}
-          <View
-            style={{
-              backgroundColor: '#E6EEFA',
-              padding: moderateScale(20),
-              marginHorizontal: moderateScale(20),
-              marginVertical: moderateScale(20),
-              borderRadius: moderateScale(20),
-              flexDirection: 'row',
-            }}>
-            <FastImage
-              source={{uri: profile?.avatar}}
-              style={{
-                height: moderateScale(40),
-                width: moderateScale(40),
-                borderRadius: moderateScale(50),
-              }}
-              resizeMode={FastImage.resizeMode.stretch}
-            />
-            <View
-              style={{flexDirection: 'column', marginLeft: moderateScale(10)}}>
-              <Text
-                style={{
-                  fontSize: moderateScale(16),
-                  fontWeight: '400',
-                  fontFamily: 'Actor-Regular',
-                  color: '#000',
-                }}>
-                What's on your head?
-              </Text>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginTop: moderateScale(10),
-                }}>
-                <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      // handleFilePicker('image');
-                      navigation.navigate('PlusIcon');
-                    }}
-                    style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <FastImage
-                      source={require('../image/AddPohoto.png')}
-                      resizeMode={FastImage.resizeMode.contain}
-                      style={{
-                        height: moderateScale(15),
-                        width: moderateScale(15),
-                        marginRight: moderateScale(5),
-                      }}
-                    />
-                    <Text
-                      style={{
-                        fontSize: moderateScale(12),
-                        fontWeight: '400',
-                        fontFamily: 'Actor-Regular',
-                        color: '#000',
-                        marginRight: moderateScale(20),
-                      }}>
-                      image
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => {
-                      // handleFilePicker('video');
-                      navigation.navigate('PlusIcon');
-                    }}
-                    style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <FastImage
-                      source={require('../image/movie_creation.png')}
-                      resizeMode={FastImage.resizeMode.contain}
-                      style={{
-                        height: moderateScale(15),
-                        width: moderateScale(15),
-                        marginRight: moderateScale(5),
-                      }}
-                    />
-                    <Text
-                      style={{
-                        fontSize: moderateScale(12),
-                        fontWeight: '400',
-                        fontFamily: 'Actor-Regular',
-                        color: '#000',
-                        marginRight: moderateScale(20),
-                      }}>
-                      Videos
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => {
-                      // handleFilePicker('video');
-                      navigation.navigate('PlusIcon');
-                    }}
-                    style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <FastImage
-                      source={require('../image/movie_creation.png')}
-                      resizeMode={FastImage.resizeMode.contain}
-                      style={{
-                        height: moderateScale(15),
-                        width: moderateScale(15),
-                        marginRight: moderateScale(5),
-                      }}
-                    />
-                    <Text
-                      style={{
-                        fontSize: moderateScale(12),
-                        fontWeight: '400',
-                        fontFamily: 'Actor-Regular',
-                        color: '#000',
-                      }}>
-                      Attach
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
-          </View>
         </>
-      }
+      } */}
 
 
       {/* feeds zone */}
-      <View
+
+      <ScrollView
+        ref={scrollViewRef}
         style={{
           flex: 1,
           backgroundColor: '#fff',
           borderTopLeftRadius: moderateScale(40),
           borderTopRightRadius: moderateScale(40),
-          padding: moderateScale(20),
-        }}>
-        {loading ? (
-          <View
-            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <ActivityIndicator size={'large'} color={'#000000'} />
-          </View>
-        ) : (
-          <>
+          // paddingBottom: moderateScale(20),
+        }}
+      >
 
-            {allPost.length > 0 ? (
-              <FlatList
-                ref={flatListRef}
-                onScroll={handleScroll}
-                contentContainerStyle={{paddingBottom: moderateScale(200)}}
-                style={{flex: 1}}
-                data={allPost}
-                stickyHeaderIndices={[0]}
-                ListHeaderComponent={
-                  <View style={{backgroundColor: '#ffffff'}}>
+        <View
+          style={{
+            flex: 1,
 
-                    <View
-                      style={{
-                        justifyContent: 'space-around',
-                        flexDirection: 'row',
-                        alignItems: 'center',
+          }}>
+          {loading ? (
+            <View
+              style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+              <ActivityIndicator size={'large'} color={'#000000'} />
+            </View>
+          ) : (
+            <>
+
+
+              <View style={{backgroundColor: '#611EBD', paddingHorizontal: moderateScale(20)}}>
+                <View style={{flexDirection: 'row', alignItems: 'center', }}>
+
+                  {/* story user */}
+                  {removedObject === undefined || removedObject === null ? (
+                    <TouchableOpacity
+                      style={{backgroundColor: '#611EBD'}}
+                      onPress={() => {
+                        setUploade(true);
                       }}>
-                      <TouchableOpacity
-                        onPress={() => SetSelect('1')}
+                      <View style={{paddingHorizontal: moderateScale(8)}}>
+
+                        <View style={styles.ppOutline}>
+                          {/* edit icon */}
+                          <View style={styles.addStory}>
+                            <FastImage
+                              source={require('../image/Plusbutton.png')}
+                              style={styles.pen}
+                              resizeMode={FastImage.resizeMode.contain}
+                            />
+                          </View>
+
+                          {/* pp */}
+                          <FastImage
+                            source={{uri: profile?.avatar}}
+                            style={styles.pp}
+                            resizeMode={FastImage.resizeMode.cover}
+                          />
+                        </View>
+                        <Text style={styles.you}>You</Text>
+                      </View>
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      onPress={() => {navigation.navigate('Status', removedObject, {key: 'you'})}}>
+                      <View
                         style={{
-                          paddingVertical: hp(1),
-                          width: moderateScale(100),
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          borderBottomWidth:
-                            select === '1' ? moderateScale(1) : 0,
-                          borderBottomColor:
-                            select === '1' ? '#000' : '#c4c4c4',
+                          paddingHorizontal: moderateScale(8),
+                          borderTopRightRadius: moderateScale(50),
                         }}>
-                        <Text
-                          style={{
-                            fontSize: moderateScale(16),
-                            color: select === '1' ? '#611EBD' : '#c4c4c4',
-                            fontFamily: 'AvenirMedium',
-                            paddingBottom: moderateScale(5),
+                        <View style={[styles.ppOutline, {overflow: 'hidden', }]}>
+                          <FastImage
+                            source={{uri: removedObject?.avatar}}
+                            style={styles.pp}
+                            resizeMode={FastImage.resizeMode.cover}
+                          />
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  )}
+
+                  {/* other users posts */}
+                  <FlatList
+                    data={story}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    renderItem={({item, index}) => {
+                      return (
+                        <TouchableOpacity
+                          key={index}
+                          onPress={() => {
+                            navigation.navigate('Status', item);
                           }}>
-                          Latest
-                        </Text>
-                      </TouchableOpacity>
+                          <View
+                            style={{
+                              paddingHorizontal: moderateScale(8),
+                            }}>
+                            <View style={[styles.ppOutline, {overflow: 'hidden', }]}>
+                              <FastImage
+                                source={{uri: item?.avatar}}
+                                style={styles.pp}
+                                resizeMode={FastImage.resizeMode.cover}
+                              />
+                            </View>
 
 
-                      <TouchableOpacity
-                        onPress={() => SetSelect('2')}
+                            <Text
+                              style={{
+                                textAlign: 'center',
+                                fontSize: moderateScale(12),
+                                fontWeight: '700',
+                                color: '#FFF',
+                                width: moderateScale(60),
+                              }}
+                              numberOfLines={2}>
+                              {item?.username}
+                            </Text>
+                          </View>
+                        </TouchableOpacity>
+                      );
+                    }}
+                    keyExtractor={item => item.id.toString()}
+                  />
+                </View>
+
+                {/* whats on your head */}
+                <TouchableOpacity
+                  onPress={() => {
+                    // handleFilePicker('image');
+                    navigation.navigate('PlusIcon');
+                  }}>
+                  <View
+                    style={{
+                      backgroundColor: '#E6EEFA',
+                      padding: moderateScale(20),
+                      marginHorizontal: moderateScale(20),
+                      marginVertical: moderateScale(20),
+                      borderRadius: moderateScale(20),
+                      flexDirection: 'row',
+                    }}>
+                    <FastImage
+                      source={{uri: profile?.avatar}}
+                      style={{
+                        height: moderateScale(40),
+                        width: moderateScale(40),
+                        borderRadius: moderateScale(50),
+                      }}
+                      resizeMode={FastImage.resizeMode.stretch}
+                    />
+                    <View
+                      style={{flexDirection: 'column', marginLeft: moderateScale(10)}}>
+                      <Text
                         style={{
-                          paddingVertical: hp(1),
-                          width: moderateScale(100),
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          borderBottomWidth:
-                            select === '2' ? moderateScale(1) : 0,
-                          borderBottomColor:
-                            select === '2' ? '#000' : '#c4c4c4',
+                          fontSize: moderateScale(16),
+                          fontWeight: '400',
+                          fontFamily: 'Actor-Regular',
+                          color: '#000',
                         }}>
-                        <Text
-                          style={{
-                            fontSize: moderateScale(16),
-                            color: select === '2' ? '#611EBD' : '#c4c4c4',
-                            fontFamily: 'AvenirMedium',
-                            paddingBottom: moderateScale(5),
-                          }}>
-                          Local
-                        </Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => SetSelect('3')}
-                        style={{
-                          paddingVertical: hp(1),
-                          width: moderateScale(100),
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          borderBottomWidth:
-                            select === '3' ? moderateScale(1) : 0,
-                          borderBottomColor:
-                            select === '3' ? '#000' : '#c4c4c4',
-                          flexDirection: 'row',
-                          alignSelf: 'center',
-                        }}>
-                        <Text
-                          style={{
-                            fontSize: moderateScale(16),
-                            color: select === '3' ? '#611EBD' : '#c4c4c4',
-                            fontFamily: 'AvenirMedium',
-                            paddingBottom: moderateScale(5),
-                          }}>
-                          Trending
-                        </Text>
-                        <FastImage
-                          style={{
-                            height: moderateScale(20),
-                            width: moderateScale(20),
-                          }}
-                          source={require('../image/TrendUp.png')}
-                          resizeMode={FastImage.resizeMode.contain}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                    {select === '2' && (
+                        What's on your head?
+                      </Text>
                       <View
                         style={{
                           flexDirection: 'row',
                           alignItems: 'center',
-                          marginVertical: moderateScale(10),
+                          marginTop: moderateScale(10),
                         }}>
-                        <FastImage
-                          source={require('../image/MapPin.png')}
-                          style={{
-                            height: moderateScale(20),
-                            width: moderateScale(20),
-                            marginRight: moderateScale(10),
-                          }}
-                        />
-                        <Text
-                          style={{
-                            fontSize: moderateScale(14),
-                            fontFamily: 'AvenirHeavy',
-                            color: '#000',
-                          }}>
-                          Kolkata
-                        </Text>
+                        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                          <TouchableOpacity
+                            onPress={() => {
+                              // handleFilePicker('image');
+                              navigation.navigate('PlusIcon');
+                            }}
+                            style={{flexDirection: 'row', alignItems: 'center'}}>
+                            <FastImage
+                              source={require('../image/AddPohoto.png')}
+                              resizeMode={FastImage.resizeMode.contain}
+                              style={{
+                                height: moderateScale(15),
+                                width: moderateScale(15),
+                                marginRight: moderateScale(5),
+                              }}
+                            />
+                            <Text
+                              style={{
+                                fontSize: moderateScale(12),
+                                fontWeight: '400',
+                                fontFamily: 'Actor-Regular',
+                                color: '#000',
+                                marginRight: moderateScale(20),
+                              }}>
+                              image
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            onPress={() => {
+                              // handleFilePicker('video');
+                              navigation.navigate('PlusIcon');
+                            }}
+                            style={{flexDirection: 'row', alignItems: 'center'}}>
+                            <FastImage
+                              source={require('../image/movie_creation.png')}
+                              resizeMode={FastImage.resizeMode.contain}
+                              style={{
+                                height: moderateScale(15),
+                                width: moderateScale(15),
+                                marginRight: moderateScale(5),
+                              }}
+                            />
+                            <Text
+                              style={{
+                                fontSize: moderateScale(12),
+                                fontWeight: '400',
+                                fontFamily: 'Actor-Regular',
+                                color: '#000',
+                                marginRight: moderateScale(20),
+                              }}>
+                              Videos
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            onPress={() => {
+                              // handleFilePicker('video');
+                              navigation.navigate('PlusIcon');
+                            }}
+                            style={{flexDirection: 'row', alignItems: 'center'}}>
+                            <FastImage
+                              source={require('../image/movie_creation.png')}
+                              resizeMode={FastImage.resizeMode.contain}
+                              style={{
+                                height: moderateScale(15),
+                                width: moderateScale(15),
+                                marginRight: moderateScale(5),
+                              }}
+                            />
+                            <Text
+                              style={{
+                                fontSize: moderateScale(12),
+                                fontWeight: '400',
+                                fontFamily: 'Actor-Regular',
+                                color: '#000',
+                              }}>
+                              Attach
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
                       </View>
-                    )}
+                    </View>
                   </View>
-                }
-                renderItem={({item, index}) => {
-                  return (
-                    <>
-                      <View key={index}
-                        style={{
-                          padding: moderateScale(20),
-                          marginTop: moderateScale(15),
-                          borderWidth: moderateScale(2),
-                          borderColor: '#c4c4c4',
-                          borderRadius: moderateScale(20),
-                        }}>
-
-                        <UserInfoComp
-                          navigation={navigation}
-                          item={item}
-                          skeletonLoader={skeletonLoader}
-                        />
-
-
-                        {/* post images/video rendering */}
-                        <FlatList
-                          horizontal
-                          data={item?.post_images}
-                          pagingEnabled
-                          showsHorizontalScrollIndicator={true}
-                          renderItem={({item: postData, index}) => {
-                            if(postData?.type === 'jpg' || postData?.type === 'gif' || postData?.type === 'png') {
-                              return (
-                                <View>
-                                  <ShowImageComp
-                                    onPress={() => {
-                                      const data = {
-                                        uri: postData?.image,
-                                      };
-                                      setSelectedImage(prevData => [
-                                        ...prevData,
-                                        data,
-                                      ]);
-                                      setIsVisible(true);
-                                    }}
-                                    postData={postData}
-                                    skeletonLoader={skeletonLoader}
-                                  />
-                                </View>
-                              );
-                            }
-                            else {
-                              return (
-                                <View style={{
-                                  height: hp(20),
-                                  width: wp(80),
-                                }}>
-                                  <VideoPlayer
-                                    url={postData?.image}
-                                    isPlaying={isPlaying}
-                                    onPlay={() => setIsPlaying(true)}
-                                    height={20}
-                                    width={wp(80)}
-                                  />
-                                </View>
-                              )
-                            }
-                          }}
-                        />
-
-                        <LikeCommentShare
-                          item={item}
-                          handelLike={handelLike}
-                          shareContent={() => {shareContent()}}
-                          onOpen={() => {[setPostSelected(item), onOpen()]}}
-                        />
-
-                      </View>
-                    </>
-                  );
-                }}
-              />
-            ) : (
-              // no post found
-              <>
-                <View
-                  style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}>
-                  <Text
-                    style={{
-                      fontSize: moderateScale(12),
-                      color: '#687684',
-                      fontFamily: 'AvenirMedium',
-                    }}>
-                    No Found Post
-                  </Text>
-                </View>
-              </>
-            )}
-          </>
-        )}
-      </View>
-
-      {/*comment modal */}
-      <Modal
-        visible={isOpen}
-        onRequestClose={onClose}
-        transparent
-        animationType='slide'
-      >
-        <View style={styles.main}>
-          <TouchableOpacity
-            style={{
-              justifyContent: 'flex-end',
-              flex: 1,
-            }}
-            onPressOut={onClose}
-            activeOpacity={1}
-          >
-            <View style={styles.whiteArea}>
-
-              <View style={{alignItems: 'center', justifyContent: 'center', marginBottom: hp(1.5)}}>
-                <Text
-                  style={{
-
-                    fontSize: moderateScale(18),
-                    fontFamily: 'AvenirMedium',
-                    color: '#000',
-                    // textDecorationStyle:'underline'
-                  }}>
-                  Comments
-                </Text>
+                </TouchableOpacity>
               </View>
 
 
-              <FlatList
-                contentContainerStyle={{paddingHorizontal: moderateScale(10)}}
-                data={postSelected?.comments}
-                renderItem={({item, index}) => {
-                  return (
-                    <View
-                      style={{
-                        marginBottom: moderateScale(10),
-                        borderBottomWidth: hp(0.022),
-                        paddingBottom:hp(1),
-                        borderBlockColor: '#E8E8E8'
-                      }}>
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          marginBottom: moderateScale(5),
-                        }}>
-                        <TouchableOpacity
-                          onPress={() => navigation.navigate('OtherProfile')}
-                          style={{flexDirection: 'row', alignItems: 'center'}}>
-                          <FastImage
-                            source={{uri: item?.user?.avatar}}
-                            resizeMode={FastImage.resizeMode.contain}
+              {allPost.length > 0 ? (
+                <>
+                  <FlatList
+                    ref={flatListRef}
+                    contentContainerStyle={{
+                      paddingBottom: moderateScale(200),
+                      paddingHorizontal: moderateScale(20),
+                      width: wp(100),
+                    }}
+                    data={allPost}
+                    stickyHeaderIndices={[0]}
+                    ListHeaderComponent={
+                      <View style={{backgroundColor: '#ffffff'}}>
+
+                        <View
+                          style={{
+                            justifyContent: 'space-around',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                          }}>
+                          <TouchableOpacity
+                            onPress={() => SetSelect('1')}
                             style={{
-                              height: moderateScale(30),
-                              width: moderateScale(30),
-                              borderRadius: moderateScale(50),
-                              backgroundColor: '#f2f2f2',
-                            }}
-                          />
-                          <View
-                            style={{
-                              flexDirection: 'column',
-                              marginLeft: moderateScale(10),
+                              paddingVertical: hp(1),
+                              width: moderateScale(100),
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                              borderBottomWidth:
+                                select === '1' ? moderateScale(1) : 0,
+                              borderBottomColor:
+                                select === '1' ? '#000' : '#c4c4c4',
                             }}>
                             <Text
                               style={{
-                                fontSize: moderateScale(13),
+                                fontSize: moderateScale(16),
+                                color: select === '1' ? '#611EBD' : '#c4c4c4',
+                                fontFamily: 'AvenirMedium',
+                                paddingBottom: moderateScale(5),
+                              }}>
+                              Latest
+                            </Text>
+                          </TouchableOpacity>
+
+
+                          <TouchableOpacity
+                            onPress={() => SetSelect('2')}
+                            style={{
+                              paddingVertical: hp(1),
+                              width: moderateScale(100),
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                              borderBottomWidth:
+                                select === '2' ? moderateScale(1) : 0,
+                              borderBottomColor:
+                                select === '2' ? '#000' : '#c4c4c4',
+                            }}>
+                            <Text
+                              style={{
+                                fontSize: moderateScale(16),
+                                color: select === '2' ? '#611EBD' : '#c4c4c4',
+                                fontFamily: 'AvenirMedium',
+                                paddingBottom: moderateScale(5),
+                              }}>
+                              Local
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            onPress={() => SetSelect('3')}
+                            style={{
+                              paddingVertical: hp(1),
+                              width: moderateScale(100),
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                              borderBottomWidth:
+                                select === '3' ? moderateScale(1) : 0,
+                              borderBottomColor:
+                                select === '3' ? '#000' : '#c4c4c4',
+                              flexDirection: 'row',
+                              alignSelf: 'center',
+                            }}>
+                            <Text
+                              style={{
+                                fontSize: moderateScale(16),
+                                color: select === '3' ? '#611EBD' : '#c4c4c4',
+                                fontFamily: 'AvenirMedium',
+                                paddingBottom: moderateScale(5),
+                              }}>
+                              Trending
+                            </Text>
+                            <FastImage
+                              style={{
+                                height: moderateScale(20),
+                                width: moderateScale(20),
+                              }}
+                              source={require('../image/TrendUp.png')}
+                              resizeMode={FastImage.resizeMode.contain}
+                            />
+                          </TouchableOpacity>
+                        </View>
+                        {select === '2' && (
+                          <View
+                            style={{
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                              marginVertical: moderateScale(10),
+                            }}>
+                            <FastImage
+                              source={require('../image/MapPin.png')}
+                              style={{
+                                height: moderateScale(20),
+                                width: moderateScale(20),
+                                marginRight: moderateScale(10),
+                              }}
+                            />
+                            <Text
+                              style={{
+                                fontSize: moderateScale(14),
                                 fontFamily: 'AvenirHeavy',
                                 color: '#000',
                               }}>
-                              {item?.user?.name}
+                              Kolkata
                             </Text>
+                          </View>
+                        )}
+                      </View>
+                    }
+                    renderItem={({item, index}) => {
+                      return (
+                        <View key={index}
+                          style={{
+                            // padding: moderateScale(20),
+                            marginTop: moderateScale(15),
+                            borderWidth: moderateScale(2),
+                            borderColor: '#c4c4c4',
+                            borderRadius: moderateScale(20),
+                          }}>
+
+                          <UserInfoComp
+                            navigation={navigation}
+                            item={item}
+                            skeletonLoader={skeletonLoader}
+                          />
+
+
+                          {/* post images/video rendering */}
+                          <FlatList
+                            horizontal
+                            data={item?.post_images}
+                            pagingEnabled
+                            showsHorizontalScrollIndicator={true}
+                            renderItem={({item: postData, index}) => {
+                              if(postData?.type === 'jpg' || postData?.type === 'gif' || postData?.type === 'png') {
+                                return (
+                                  <View style={{}}>
+                                    <ShowImageComp
+                                      onPress={() => {
+                                        const data = {
+                                          uri: postData?.image,
+                                        };
+                                        setSelectedImage(prevData => [
+                                          ...prevData,
+                                          data,
+                                        ]);
+                                        setIsVisible(true);
+                                      }}
+                                      postData={postData}
+                                      skeletonLoader={skeletonLoader}
+                                    />
+                                  </View>
+                                );
+                              }
+                              else {
+                                return (
+                                  <View style={{
+                                    height: hp(20),
+                                    width: wp(80),
+                                  }}>
+                                    <VideoPlayer
+                                      url={postData?.image}
+                                      isPlaying={isPlaying}
+                                      onPlay={() => setIsPlaying(true)}
+                                      height={20}
+                                      width={wp(80)}
+                                    />
+                                  </View>
+                                )
+                              }
+                            }}
+                          />
+
+                          <LikeCommentShare
+                            item={item}
+                            handelLike={handelLike}
+                            shareContent={(val) => {shareContent(val)}}
+                            onOpen={() => {[setPostSelected([]), setPostSelected(item), onOpen()]}}
+                          />
+
+                        </View>
+                      );
+                    }}
+                  />
+                </>
+              ) : (
+                // no post found
+                <>
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <Text
+                      style={{
+                        fontSize: moderateScale(12),
+                        color: '#687684',
+                        fontFamily: 'AvenirMedium',
+                      }}>
+                      No Found Post
+                    </Text>
+                  </View>
+                </>
+              )}
+
+              {/* <TouchableOpacity onPress={scrollToTop} style={{
+                position: 'absolute',
+                bottom: 0,
+                backgroundColor: 'red'
+              }}>
+                <ImageComp
+                  source={require('../image/up.png')}
+                  height={3}
+                  width={hp(3)}
+                  mode={'contain'}
+                  style={{undefined}}
+                />
+              </TouchableOpacity> */}
+            </>
+          )}
+        </View>
+
+
+        {/*comment modal */}
+        <Modal
+          visible={isOpen}
+          onRequestClose={onClose}
+          transparent
+          animationType='slide'
+        >
+          <View style={styles.main}>
+            <TouchableOpacity
+              style={{
+                justifyContent: 'flex-end',
+                flex: 1,
+              }}
+              onPressOut={onClose}
+              activeOpacity={1}
+            >
+              <View style={styles.whiteArea}>
+
+                <View style={{alignItems: 'center', justifyContent: 'center', marginBottom: hp(1.5)}}>
+                  <Text
+                    style={{
+
+                      fontSize: moderateScale(18),
+                      fontFamily: 'AvenirMedium',
+                      color: '#000',
+                      // textDecorationStyle:'underline'
+                    }}>
+                    Comments
+                  </Text>
+                </View>
+
+
+                <FlatList
+                  contentContainerStyle={{paddingHorizontal: moderateScale(10)}}
+                  data={postSelected?.comments}
+                  renderItem={({item, index}) => {
+                    return (
+                      <View
+                        style={{
+                          marginBottom: moderateScale(10),
+                          borderBottomWidth: hp(0.022),
+                          paddingBottom: hp(1),
+                          borderBlockColor: '#E8E8E8'
+                        }}>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            marginBottom: moderateScale(5),
+                          }}>
+                          <TouchableOpacity
+                            onPress={() => navigation.navigate('OtherProfile')}
+                            style={{flexDirection: 'row', alignItems: 'center'}}>
+                            <FastImage
+                              source={{uri: item?.user?.avatar}}
+                              resizeMode={FastImage.resizeMode.contain}
+                              style={{
+                                height: moderateScale(30),
+                                width: moderateScale(30),
+                                borderRadius: moderateScale(50),
+                                backgroundColor: '#f2f2f2',
+                              }}
+                            />
                             <View
-                              style={{flexDirection: 'row', alignItems: 'center'}}>
+                              style={{
+                                flexDirection: 'column',
+                                marginLeft: moderateScale(10),
+                              }}>
                               <Text
                                 style={{
-                                  fontSize: moderateScale(8),
+                                  fontSize: moderateScale(13),
                                   fontFamily: 'AvenirHeavy',
-                                  color: '#606770',
-                                  marginRight: moderateScale(5),
+                                  color: '#000',
                                 }}>
-                                {moment(item?.created_at).format('LLL')}
+                                {item?.user?.name}
                               </Text>
-                              <FastImage
-                                source={require('../image/Group.png')}
-                                resizeMode={FastImage.resizeMode.stretch}
-                                style={{
-                                  height: moderateScale(9),
-                                  width: moderateScale(9),
-                                }}
-                              />
+                              <View
+                                style={{flexDirection: 'row', alignItems: 'center'}}>
+                                <Text
+                                  style={{
+                                    fontSize: moderateScale(8),
+                                    fontFamily: 'AvenirHeavy',
+                                    color: '#606770',
+                                    marginRight: moderateScale(5),
+                                  }}>
+                                  {moment(item?.created_at).format('LLL')}
+                                </Text>
+                                <FastImage
+                                  source={require('../image/Group.png')}
+                                  resizeMode={FastImage.resizeMode.stretch}
+                                  style={{
+                                    height: moderateScale(9),
+                                    width: moderateScale(9),
+                                  }}
+                                />
+                              </View>
                             </View>
-                          </View>
-                        </TouchableOpacity>
+                          </TouchableOpacity>
+                        </View>
+                        <Text
+                          style={{
+                            fontSize: moderateScale(12),
+                            fontFamily: 'AvenirMedium',
+                            color: '#000',
+                            marginRight: moderateScale(5),
+                          }}>
+                          {item?.text}
+                        </Text>
                       </View>
-                      <Text
-                        style={{
-                          fontSize: moderateScale(12),
-                          fontFamily: 'AvenirMedium',
-                          color: '#000',
-                          marginRight: moderateScale(5),
-                        }}>
-                        {item?.text}
-                      </Text>
-                    </View>
-                  );
-                }}
-              />
-
-
-              {/* comment and send */}
-              <View
-                style={{
-                  width: '95%',
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginTop: hp(1.5)
-                }}>
-                <FastImage
-                  source={{uri: profile?.avatar}}
-                  style={{
-                    height: moderateScale(35),
-                    width: moderateScale(35),
-                    borderRadius: moderateScale(50),
+                    );
                   }}
-                  resizeMode={FastImage.resizeMode.stretch}
                 />
-                <TextInput
-                  placeholder="Add Comment.... "
-                  style={styles.inputActionSheet}
-                  placeholderTextColor={'#D1D0D0'}
-                  value={search}
-                  onChangeText={text => setSearch(text)}
-                />
-                <TouchableOpacity
-                  onPress={() => {[onClose(),postComment()]}}
-                  disabled={search.length === 0 ? true : false}
+
+
+                {/* comment and send */}
+                <View
                   style={{
-                    width: moderateScale(25),
-                    height: moderateScale(25),
+                    width: '95%',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: hp(1.5)
                   }}>
-                  <Image
-                    source={require('../image/send.png')}
+                  <FastImage
+                    source={{uri: profile?.avatar}}
                     style={{
-                      tintColor: '#262626',
+                      height: moderateScale(35),
+                      width: moderateScale(35),
+                      borderRadius: moderateScale(50),
+                    }}
+                    resizeMode={FastImage.resizeMode.stretch}
+                  />
+                  <TextInput
+                    placeholder="Add Comment.... "
+                    style={styles.inputActionSheet}
+                    placeholderTextColor={'#D1D0D0'}
+                    value={search}
+                    onChangeText={text => setSearch(text)}
+                  />
+                  <TouchableOpacity
+                    onPress={() => {[onClose(), postComment()]}}
+                    disabled={search.length === 0 ? true : false}
+                    style={{
                       width: moderateScale(25),
                       height: moderateScale(25),
-                    }}
-                    resizeMode="contain"
-                  />
-                </TouchableOpacity>
+                    }}>
+                    <Image
+                      source={require('../image/send.png')}
+                      style={{
+                        tintColor: '#262626',
+                        width: moderateScale(25),
+                        height: moderateScale(25),
+                      }}
+                      resizeMode="contain"
+                    />
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
 
-          </TouchableOpacity>
-        </View>
-      </Modal>
+            </TouchableOpacity>
+          </View>
+        </Modal>
 
-      {/*choose story picture modal */}
-      <Actionsheet isOpen={uploade} onClose={() => setUploade(false)}>
-        <Actionsheet.Content style={{width: '100%'}}>
-          <Center style={{width: '100%'}}>
-            <Text style={styles.uploadText}>Upload Photo</Text>
-            <Text style={styles.chooseText}>Choose your Story Picture </Text>
-            <Button
-              style={styles.btnCamera}
-              onPress={() => {
-                takePhotoFromCamera();
-                onClose();
-              }}>
-              Take Photo
-            </Button>
-            <Button
-              style={styles.btnCamera}
-              onPress={() => {
-                choosePhotoFromLibrary();
-                onClose();
-              }}>
-              Choose From Library
-            </Button>
-            {/* <Button style={styles.btnCamera} onPress={onClose}>
+        {/*choose story picture modal */}
+        <Actionsheet isOpen={uploade} onClose={() => setUploade(false)}>
+          <Actionsheet.Content style={{width: '100%'}}>
+            <Center style={{width: '100%'}}>
+              <Text style={styles.uploadText}>Upload Photo</Text>
+              <Text style={styles.chooseText}>Choose your Story Picture </Text>
+              <Button
+                style={styles.btnCamera}
+                onPress={() => {
+                  takePhotoFromCamera();
+                  onClose();
+                }}>
+                Take Photo
+              </Button>
+              <Button
+                style={styles.btnCamera}
+                onPress={() => {
+                  choosePhotoFromLibrary();
+                  onClose();
+                }}>
+                Choose From Library
+              </Button>
+              {/* <Button style={styles.btnCamera} onPress={onClose}>
               Cancel
             </Button> */}
-          </Center>
-        </Actionsheet.Content>
-      </Actionsheet>
+            </Center>
+          </Actionsheet.Content>
+        </Actionsheet>
 
-      <ImageView
-        images={selectedImage}
-        imageIndex={0}
-        visible={visible}
-        onRequestClose={() => setIsVisible(false)}
-      />
+        <ImageView
+          images={selectedImage}
+          imageIndex={0}
+          visible={visible}
+          onRequestClose={() => setIsVisible(false)}
+        />
+      </ScrollView>
     </SafeAreaView>
   );
 }

@@ -16,15 +16,34 @@ import Swiper from 'react-native-swiper';
 import {moderateScale} from '../utils/overAllNormalization';
 import {useNavigation} from '@react-navigation/native';
 import {request, PERMISSIONS} from 'react-native-permissions';
+import Contacts from 'react-native-contacts';
+
 
 const PermissionContact = ({route}) => {
+
   const nav = useNavigation();
+
   const handlePermission = async Permission => {
     request(Permission).then(result => {
       console.log(result);
       nav.navigate('PermissionNotifications');
     });
   };
+
+  Contacts.getAll().then(contacts => {
+    // contacts returned
+
+    const allPhoneNumbers = contacts.reduce((acc, contact) => {
+      const contactPhoneNumbers = contact.phoneNumbers?.map((phoneNumber) => phoneNumber?.number) || [];
+      const validPhoneNumbers = contactPhoneNumbers.filter((number) => number.length >= 10);
+      return acc.concat(validPhoneNumbers);
+    }, []);
+    console.log('contacts:::::::::::::', allPhoneNumbers);
+
+  })
+
+
+
   return (
     <View style={{backgroundColor: '#611EBD', flex: 1}}>
       <View
@@ -91,7 +110,7 @@ const PermissionContact = ({route}) => {
         </ScrollView>
         <TouchableOpacity
           onPress={() => {
-            if (Platform.OS === 'ios') {
+            if(Platform.OS === 'ios') {
               handlePermission(PERMISSIONS.IOS.LOCATION_ALWAYS);
             } else {
               handlePermission(PERMISSIONS.ANDROID.READ_CONTACTS);

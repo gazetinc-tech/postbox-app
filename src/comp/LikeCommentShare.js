@@ -12,7 +12,8 @@ export default function LikeCommentShare({item, handelLike, shareContent,onOpen}
 				flexDirection: 'row',
 				alignItems: 'center',
 				justifyContent: 'space-between',
-				marginTop: moderateScale(15),
+				marginVertical: moderateScale(15),
+				paddingHorizontal: moderateScale(20),
 			}}>
 
 			{/* like unlike */}
@@ -108,7 +109,8 @@ export default function LikeCommentShare({item, handelLike, shareContent,onOpen}
 						marginRight: moderateScale(10),
 					}}
 					onPress={() => {
-						shareContent();
+						console.log('Press::::::::: item', item);
+						shareContent(item);
 					}}>
 					<FastImage
 						source={require('../image/ShareFat.png')}

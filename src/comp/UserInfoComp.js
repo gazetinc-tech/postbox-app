@@ -7,7 +7,10 @@ import {heightPercentageToDP} from 'react-native-responsive-screen';
 
 export default function UserInfoComp({navigation, item, skeletonLoader, }) {
 	return (
-		<>
+		<View style={{
+			paddingHorizontal: moderateScale(20),
+			paddingTop: moderateScale(20),
+		}}>
 			<View
 				style={{
 					flexDirection: 'row',
@@ -110,6 +113,6 @@ export default function UserInfoComp({navigation, item, skeletonLoader, }) {
 					{item?.text == 'hidetext' ? '' : item.text}
 				</Text>
 			</Skeleton>
-		</>
+		</View>
 	);
 }
