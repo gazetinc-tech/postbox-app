@@ -6,6 +6,7 @@ import FastImage from 'react-native-fast-image';
 import {heightPercentageToDP} from 'react-native-responsive-screen';
 
 export default function UserInfoComp({navigation, item, skeletonLoader, }) {
+
 	return (
 		<View style={{
 			paddingHorizontal: moderateScale(20),
@@ -31,7 +32,7 @@ export default function UserInfoComp({navigation, item, skeletonLoader, }) {
 							borderRadius: moderateScale(50),
 						}}>
 						<FastImage
-							source={{uri: item?.creater_avatar}}
+							source={{uri: item?.creater_avatar ? item?.creater_avatar : item?.post_user?.avatar}}
 							resizeMode={FastImage.resizeMode.cover}
 							style={{
 								height: moderateScale(50),
@@ -59,7 +60,7 @@ export default function UserInfoComp({navigation, item, skeletonLoader, }) {
 									fontFamily: 'AvenirHeavy',
 									color: '#000',
 								}}>
-								{item?.creater_name}
+								{item?.creater_name ? item?.creater_name : item?.post_user?.name}
 							</Text>
 						</Skeleton>
 

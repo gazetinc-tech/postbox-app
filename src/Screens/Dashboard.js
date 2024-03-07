@@ -636,7 +636,8 @@ function Dashboard({navigation}) {
               </View>
 
 
-              {allPost.length > 0 ? (
+              {/* {allPost.length > 0 ? ( */}
+              {allPost !== undefined && allPost?.length > 0 ? (
                 <>
                   <FlatList
                     ref={flatListRef}
