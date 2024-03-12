@@ -3,8 +3,7 @@ import {View, Text, TouchableOpacity} from 'react-native';
 import {moderateScale} from '../utils/overAllNormalization';
 import FastImage from 'react-native-fast-image';
 
-export default function LikeCommentShare({item, handelLike, shareContent,onOpen}) {
-
+export default function LikeCommentShare({item, handelLike, shareContent, onOpen}) {
 
 	return (
 		<View
@@ -52,29 +51,6 @@ export default function LikeCommentShare({item, handelLike, shareContent,onOpen}
 					flexDirection: 'row',
 					alignItems: 'center',
 				}}>
-
-				{/* <TouchableOpacity
-                              style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                marginRight: moderateScale(10),
-                              }}>
-                              <FastImage
-                                source={require('../image/Eye.png')}
-                                style={{height: moderateScale(30), width: 30}}
-                                resizeMode={FastImage.resizeMode.stretch}
-                              />
-                              <Text
-                                style={{
-                                  fontSize: moderateScale(12),
-                                  fontFamily: 'AvenirMedium',
-                                  color: '#000',
-                                  marginLeft: moderateScale(5),
-                                }}>
-                                1
-                              </Text>
-                </TouchableOpacity>
-				*/}
 
 				{/* comment */}
 				<TouchableOpacity
@@ -124,7 +100,7 @@ export default function LikeCommentShare({item, handelLike, shareContent,onOpen}
 							color: '#000',
 							marginLeft: moderateScale(5),
 						}}>
-						1
+						{item?.shares}
 					</Text>
 				</TouchableOpacity>
 			</View>

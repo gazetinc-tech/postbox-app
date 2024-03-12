@@ -179,20 +179,67 @@ export default function WorkLocation({navigation}) {
 	}
 
 	const shareContent = async (item) => {
-		console.log('item::::::::::::x', item)
+		var form = new FormData();
+
 		let options = {
 			title: 'Post-Box',
 			message: `Check out this awesome Post-Box app! post from ${item?.creater_name}`,
 			id: item?.post_id,
 			subject: 'Share Link',
 		};
-		Share.open(options)
-			.then(res => {
-				console.log(res);
+
+		form.append('post_id', item?.post_id);
+
+		console.log(form, 'form:::::::::::::::::::::::::::::', userToken)
+
+
+		axios({
+			method: "POST",
+			url: `${BaseUrl} + share-post`,
+			data:form,
+			headers: {
+				Authorization: `Bearer ${userToken}`,
+			}
+		})
+			.then(function(response) {
+				// handle success
+				console.log(response);
 			})
-			.catch(err => {
-				err && console.log(err);
-			});
+			.catch(function(error) {
+				// handle error
+				console.log(error);
+			})
+
+		// await axios(BaseUrl + `share-post`, form, {
+		// 	method: "POST",
+		// 	headers: {
+		// 		Authorization: `Bearer ${userToken}`,
+		// 	},
+		// })
+		// 	.then(response => {
+		// 		console.log('response:::::::::::::::::1', response)
+		// 		// if(response?.data?.status === 200) {
+		// 		// 	// setLoading(false);
+
+		// 		// 	// Snackbar.show({
+		// 		// 	// 	text: ,
+		// 		// 	// 	textColor: '#002570',
+		// 		// 	// 	numberOfLines: 1,
+		// 		// 	// 	backgroundColor: '#fff',
+		// 		// 	// });
+		// 		// }
+		// 		// else {
+		// 		// 	console.log('response:::::::::::::::::2', response)
+		// 		// }
+		// 	})
+
+		// Share.open(options)
+		// 	.then(res => {
+		// 		console.log(res);
+		// 	})
+		// 	.catch(err => {
+		// 		err && console.log(err);
+		// 	});
 		// try {
 		//   const result = await Share.share({
 		// title: 'Post-Box',

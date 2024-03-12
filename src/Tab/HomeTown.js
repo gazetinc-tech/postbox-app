@@ -179,7 +179,6 @@ export default function HomeTown({navigation}) {
 	}
 
 	const shareContent = async (item) => {
-		console.log('item::::::::::::x', item)
 		let options = {
 			title: 'Post-Box',
 			message: `Check out this awesome Post-Box app! post from ${item?.creater_name}`,
